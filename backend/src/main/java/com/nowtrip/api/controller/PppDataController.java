@@ -1,9 +1,12 @@
 package com.nowtrip.api.controller;
 
+import com.nowtrip.api.response.ppp.PppResponse;
 import com.nowtrip.api.service.ppp.PppDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -11,14 +14,17 @@ import org.springframework.web.bind.annotation.*;
 public class PppDataController {
     private final PppDataService pppDataService;
 
-    @PostMapping("/{countryCode}")
-    public ResponseEntity<String> fetchAndSavePppData(@PathVariable String countryCode) {
-        try {
-            pppDataService.savePppData(countryCode);
-            return ResponseEntity.ok("PPP 데이터 저장 완료");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("오류 발생: " + e.getMessage());
-        }
+    @PostMapping
+    public ResponseEntity<String> savePppData() {
+        pppDataService.saveAllPppData();
+        return ResponseEntity.ok("ok");
+    }
+
+
+    @GetMapping("{iso3code}")
+    public ResponseEntity<List<PppResponse>> getPppData(@PathVariable String iso3code) {
+        List<PppResponse> pppDataByCountry = pppDataService.getPppDataByCountry(iso3code);
+        return ResponseEntity.ok(pppDataByCountry);
     }
 
 }

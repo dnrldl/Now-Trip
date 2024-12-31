@@ -17,9 +17,15 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
+//    @PostMapping
+//    public ResponseEntity<String> createPost(@RequestBody @Valid PostRequest request) {
+//        Long id = postService.createPost(request);
+//        return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
+//    }
+
     @PostMapping
-    public ResponseEntity<String> createPost(@RequestBody @Valid PostRequest request) {
-        Long id = postService.createPost(request);
+    public ResponseEntity<String> createPostByCountry(@RequestBody @Valid PostRequest request) {
+        Long id = postService.createPostByCountry(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
     }
 
@@ -29,10 +35,16 @@ public class PostController {
         return ResponseEntity.ok(postResponses);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPost(@PathVariable Long id) {
         PostResponse postResponse = postService.getPost(id);
         return ResponseEntity.ok(postResponse);
+    }
+
+    @GetMapping("/country/{iso3Code}")
+    public ResponseEntity<List<PostResponse>> getAllPostsByCountry(@PathVariable String iso3Code) {
+        List<PostResponse> postResponses = postService.getPostsByCountry(iso3Code);
+        return ResponseEntity.ok(postResponses);
     }
 
     @PutMapping("/{id}")

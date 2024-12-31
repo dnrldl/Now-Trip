@@ -1,4 +1,4 @@
-package com.nowtrip.api.response;
+package com.nowtrip.api.response.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.nowtrip.api.response;
+package com.nowtrip.api.response.user;
 
 import com.nowtrip.api.enums.Role;
 import lombok.AllArgsConstructor;
