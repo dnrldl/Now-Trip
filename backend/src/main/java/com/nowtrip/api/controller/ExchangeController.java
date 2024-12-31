@@ -1,5 +1,6 @@
 package com.nowtrip.api.controller;
 
+import com.nowtrip.api.response.exchange.ExchangeResponse;
 import com.nowtrip.api.service.exchageRate.ExchangeRateApiClient;
 import com.nowtrip.api.service.exchageRate.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,9 +25,15 @@ public class ExchangeController {
     }
 
     @GetMapping("/{targetCurrency}")
-    public ResponseEntity<BigDecimal> getExchangeRate(@PathVariable String targetCurrency) {
-        BigDecimal value = exchangeRateService.getExchangeRate(targetCurrency);
-        return ResponseEntity.ok(value);
+    public ResponseEntity<ExchangeResponse> getExchangeRate(@PathVariable String targetCurrency) {
+        ExchangeResponse exchangeRate = exchangeRateService.getExchangeRate(targetCurrency);
+        return ResponseEntity.ok(exchangeRate);
+    }
+
+    @GetMapping("/history/{targetCurrency}")
+    public ResponseEntity<List<ExchangeResponse>> getExchangeRateHistory(@PathVariable String targetCurrency) {
+        List<ExchangeResponse> rates = exchangeRateService.getExchangeRateHistory(targetCurrency);
+        return ResponseEntity.ok(rates);
     }
 
     /**

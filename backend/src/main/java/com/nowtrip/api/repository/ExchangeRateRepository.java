@@ -9,7 +9,8 @@ import java.util.Optional;
 
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
     Optional<ExchangeRate> findByTargetCurrency(String targetCurrency);
+    Optional<ExchangeRate> findTopByTargetCurrencyOrderByLastUpdatedDesc(String targetCurrency);
     // 특정 대상 통화의 최신 환율을 시간순으로 정렬하여 반환
-    List<ExchangeRate> findByTargetCurrencyOrderByLastUpdatedDesc(String targetCurrency);
+    List<ExchangeRate> findByTargetCurrencyOrderByLastUpdatedAsc(String targetCurrency);
     boolean existsByLastUpdated(LocalDateTime lastUpdated);
 }
