@@ -12,15 +12,19 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@Table(name = "exchange_rate")
+@Table(name = "exchange_rate",
+        indexes = @Index(name = "idx_last_updated", columnList = "lastUpdated"))
 public class ExchangeRate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, length = 3, unique = true)
     private String targetCurrency;
+
     @Column(nullable = false, precision = 18, scale = 6)
     private BigDecimal exchangeRate;
+
     @Column(nullable = false)
-    private LocalDateTime lastUpdatedAt;
+    private LocalDateTime lastUpdated;
 }

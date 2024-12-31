@@ -2,7 +2,7 @@ package com.nowtrip.api.service.auth;
 
 import com.nowtrip.api.enums.Role;
 import com.nowtrip.api.request.UserLoginRequest;
-import com.nowtrip.api.response.UserLoginResponse;
+import com.nowtrip.api.response.user.UserLoginResponse;
 import com.nowtrip.api.security.CustomUserDetails;
 import com.nowtrip.api.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;

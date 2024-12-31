@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -16,33 +17,12 @@ import java.util.Map;
 public class ExchangeRateService {
     private final ExchangeRateRepository exchangeRateRepository;
 
-    /**
-     * @param rates 환율 정보 맵 ({"KRW": 1300.5, "EUR": 0.85})
-     */
-    @Transactional
-    public void saveOrUpdateExchangeRates(Map<String, BigDecimal> rates) {
-        for (Map.Entry<String, BigDecimal> entry : rates.entrySet()) {
-            String targetCurrency = entry.getKey();
-            BigDecimal exchangeRate = entry.getValue();
-
-            ExchangeRate existingRate = exchangeRateRepository.findByTargetCurrency(targetCurrency)
-                    .orElse(null);
-
-            if (existingRate == null) {
-                ExchangeRate newRate = ExchangeRate.builder()
-                        .targetCurrency(targetCurrency)
-                        .exchangeRate(exchangeRate)
-                        .lastUpdatedAt(LocalDateTime.now())
-                        .build();
-                exchangeRateRepository.save(newRate);
-            } else {
-                existingRate.setExchangeRate(exchangeRate);
-                existingRate.setLastUpdatedAt(LocalDateTime.now());
-                exchangeRateRepository.save(existingRate);
-            }
-        }
+    // 특정 통화의 시간별 환율 조회
+    public List<ExchangeRate> getExchangeRateHistory(String targetCurrency) {
+        return exchangeRateRepository.findByTargetCurrencyOrderByLastUpdatedDesc(targetCurrency);
     }
 
+    // 환율 조회
     public BigDecimal getExchangeRate(String targetCurrency) {
         return exchangeRateRepository.findByTargetCurrency(targetCurrency)
                 .map(ExchangeRate::getExchangeRate)

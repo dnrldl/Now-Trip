@@ -16,17 +16,16 @@ public class ExchangeController {
     private final ExchangeRateService exchangeRateService;
     private final ExchangeRateApiClient exchangeRateApiClient;
 
+    @PostMapping
+    public ResponseEntity<String> saveExchangeRates() {
+        exchangeRateApiClient.fetchAndStoreExchangeRates();
+        return ResponseEntity.ok("환율을 성공적으로 저장했습니다");
+    }
+
     @GetMapping("/{targetCurrency}")
     public ResponseEntity<BigDecimal> getExchangeRate(@PathVariable String targetCurrency) {
         BigDecimal value = exchangeRateService.getExchangeRate(targetCurrency);
         return ResponseEntity.ok(value);
-    }
-
-    @PostMapping("/update")
-    public ResponseEntity<String> updateExchangeRates() {
-        Map<String, BigDecimal> rates = exchangeRateApiClient.fetchExchangeRates();
-        exchangeRateService.saveOrUpdateExchangeRates(rates);
-        return ResponseEntity.ok("환율을 성공적으로 저장했습니다");
     }
 
     /**

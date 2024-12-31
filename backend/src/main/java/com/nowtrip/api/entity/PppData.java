@@ -17,11 +17,11 @@ public class PppData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String countryCode; // ex. JP
+    @Column(nullable = false, length = 3)
+    private String iso3Code; // iso3
 
     @Column(nullable = false)
-    private String countryName; // ex. Japan
+    private String countryName;
 
     @Column(precision = 18, scale = 2)
     private BigDecimal pppValue;

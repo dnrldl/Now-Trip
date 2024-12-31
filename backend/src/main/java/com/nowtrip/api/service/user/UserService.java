@@ -6,7 +6,7 @@ import com.nowtrip.api.exception.UserNotFoundException;
 import com.nowtrip.api.request.UserPwUpdateRequest;
 import com.nowtrip.api.request.UserRegistRequest;
 import com.nowtrip.api.request.UserNickNameUpdateRequest;
-import com.nowtrip.api.response.UserInfoResponse;
+import com.nowtrip.api.response.user.UserInfoResponse;
 import com.nowtrip.api.enums.Role;
 import com.nowtrip.api.exception.DuplicateException;
 import com.nowtrip.api.repository.UserRepository;
