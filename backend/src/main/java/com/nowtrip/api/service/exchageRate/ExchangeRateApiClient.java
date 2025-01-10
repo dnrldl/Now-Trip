@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -36,7 +35,6 @@ public class ExchangeRateApiClient {
         // 응답 데이터 검증
         if (rawResponse == null || !rawResponse.containsKey("conversion_rates") || !rawResponse.containsKey("time_last_update_unix"))
             throw new IllegalStateException("유효하지 않은 환율 데이터 응답");
-
 
         // 시간 데이터 파싱
         long lastUpdateUnix = ((Number) rawResponse.get("time_last_update_unix")).longValue();

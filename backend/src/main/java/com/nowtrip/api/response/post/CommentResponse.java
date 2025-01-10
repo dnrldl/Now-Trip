@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CommentResponse {
     private Long id;
+    private Long postId;
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

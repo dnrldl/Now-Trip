@@ -2,6 +2,7 @@ package com.nowtrip.api.exception;
 
 import com.nowtrip.api.response.error.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -66,8 +67,12 @@ public class GlobalExceptionHandler {
 
     // 잘못된 데이터 요청
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "잘못된 요청",
+                Map.of("error", ex.getMessage())
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     // 기타 예외 처리
@@ -77,9 +82,6 @@ public class GlobalExceptionHandler {
                 "서버 내부 에러",
                 Map.of("error", ex.getMessage())
         );
-
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-
 }

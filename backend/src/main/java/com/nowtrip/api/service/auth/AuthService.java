@@ -22,6 +22,7 @@ public class AuthService {
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthenticationManager authenticationManager;
 
+    // user login
     public UserLoginResponse login(UserLoginRequest request) {
         String email = request.getEmail();
         String password = request.getPassword();
