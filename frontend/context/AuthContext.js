@@ -1,7 +1,13 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { saveToken, getToken, deleteToken } from '../utils/secureStore';
+import { validateToken } from '../api/auth';
+import { Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export const AuthContext = createContext();
+
+const ACCESS = 'accessToken';
+const REFRESH = 'refreshToken';
 
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
@@ -9,84 +15,77 @@ export const AuthProvider = ({ children }) => {
     refreshToken: null,
     isAuthenticated: false,
   });
+  const router = useRouter();
 
-  // 토큰 저장
+  // 토큰들 SecureStore에 저장
   const setTokens = async (accessToken, refreshToken) => {
-    await saveToken('accessToken', accessToken);
-    await saveToken('refreshToken', refreshToken);
+    await saveToken(ACCESS, accessToken);
+    await saveToken(REFRESH, refreshToken);
     setAuthState({
       accessToken,
       refreshToken,
-      isAuthenticated: !!accessToken,
+      isAuthenticated: true,
     });
+    console.log('로그인 성공');
   };
 
-  // 토큰 삭제
-  const clearTokens = async () => {
-    await deleteToken('accessToken');
-    await deleteToken('refreshToken');
+  // 토큰들 삭제
+  const logout = async () => {
+    await deleteToken(ACCESS);
+    await deleteToken(REFRESH);
     setAuthState({
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
     });
-  };
-
-  const logout = async () => {
-    await deleteToken('accessToken');
-    setAuthState({
-      isAuthenticated: false,
-      accessToken: null,
-    });
+    console.log('로그아웃 성공');
+    router.push('/login');
   };
 
   const loadTokens = async () => {
-    const accessToken = await getToken('accessToken');
-    const refreshToken = await getToken('refreshToken');
-    if (accessToken) {
+    const accessToken = await getToken(ACCESS);
+    const refreshToken = await getToken(REFRESH);
+    const isValid = await validateToken();
+
+    if (!accessToken || !refreshToken) {
+      console.log('앱 실행시 토큰이 없습니다.');
+      return;
+    }
+
+    // 토큰 유효시
+    if (isValid) {
       setAuthState({
         accessToken,
         refreshToken,
         isAuthenticated: true,
       });
+
+      console.log('앱 실행시 토큰 로드 완료');
+      console.log('accessToken:', accessToken);
+      console.log('refreshToken:', refreshToken);
+    } else {
+      // 토큰 만료시
+      console.log('토큰이 유효하지 않습니다.');
+      Alert.alert('세션 만료', '로그인이 필요합니다.');
+      await logout();
     }
   };
 
-  const refreshAccessToken = async () => {
-    const refreshToken = await getToken('refreshToken');
-    if (!refreshToken) {
-      throw new Error('Refresh Token이 없습니다.');
-    }
+  // 리프레시 토큰으로 엑세스 토큰 갱신
+  const refreshAccessToken = async () => {};
 
-    try {
-      // 서버에 갱신 요청
-      const response = await fetch('http://localhost:8080/api/users/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!response.ok) {
-        throw new Error('토큰 갱신 실패');
-      }
-
-      const { accessToken, refreshToken: newRefreshToken } =
-        await response.json();
-      await setTokens(accessToken, newRefreshToken); // 갱신된 토큰 저장
-    } catch (error) {
-      console.error(error);
-      await clearTokens(); // 토큰 삭제 및 로그아웃 처리
-    }
-  };
-
-  // 앱 로드 시 토큰 가져오기
+  // 앱 로드 시 실행
   useEffect(() => {
     loadTokens();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ authState, setTokens, clearTokens, logout }}>
+    <AuthContext.Provider
+      value={{ authState, setTokens, logout, refreshAccessToken }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);

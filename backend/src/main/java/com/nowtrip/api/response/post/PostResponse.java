@@ -17,7 +17,6 @@ public class PostResponse {
     private String title;
     private String content;
     private String country;
-    private List<CommentResponse> comments;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;

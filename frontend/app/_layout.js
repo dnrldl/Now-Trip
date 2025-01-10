@@ -4,8 +4,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AuthProvider } from '../context/AuthContext';
+import { ExchangeRateProvider } from '../context/ExchangeRateContext';
+import { SafeAreaView } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -26,9 +27,9 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <AuthProvider>
+        <ExchangeRateProvider>
           <Stack>
             <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
             <Stack.Screen
@@ -45,12 +46,13 @@ export default function RootLayout() {
                 headerBackButtonDisplayMode: 'minimal',
               }}
             />
+
             <Stack.Screen name='test' />
             <Stack.Screen name='protected' />
           </Stack>
-          <StatusBar style='auto' />
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </AuthProvider>
+          <StatusBar style='dark' />
+        </ExchangeRateProvider>
+      </AuthProvider>
+    </SafeAreaView>
   );
 }

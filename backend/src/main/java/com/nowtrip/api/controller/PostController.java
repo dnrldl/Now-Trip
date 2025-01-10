@@ -5,6 +5,7 @@ import com.nowtrip.api.response.post.PostResponse;
 import com.nowtrip.api.service.post.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +30,18 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
     }
 
+//    @GetMapping
+//    public ResponseEntity<List<PostResponse>> getAllPosts() {
+//        List<PostResponse> postResponses = postService.getPosts();
+//        return ResponseEntity.ok(postResponses);
+//    }
+
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getAllPosts() {
-        List<PostResponse> postResponses = postService.getPosts();
-        return ResponseEntity.ok(postResponses);
+    public ResponseEntity<Page<PostResponse>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(postService.getPosts(page, size));
     }
 
     @GetMapping("/{id}")

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { login } from '../services/api';
+import { login } from '../api/auth';
 import { AuthContext } from '../context/AuthContext';
 
 export default function LoginScreen() {
@@ -39,9 +39,10 @@ export default function LoginScreen() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        autoCapitalize='none'
       />
       <Button title='로그인' onPress={handleLogin} />
-      <Button title='회원가입' onPress={() => router.push('/register')} />
+      <Button title='회원가입' onPress={() => router.replace('/register')} />
     </View>
   );
 }

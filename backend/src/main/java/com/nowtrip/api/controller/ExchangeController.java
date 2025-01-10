@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/exchange")
@@ -22,6 +21,12 @@ public class ExchangeController {
     public ResponseEntity<String> saveExchangeRates() {
         exchangeRateApiClient.fetchAndStoreExchangeRates();
         return ResponseEntity.ok("환율을 성공적으로 저장했습니다");
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<ExchangeResponse>> getExchangeRates() {
+        List<ExchangeResponse> exchangeRates = exchangeRateService.getExchangeRates();
+        return ResponseEntity.ok(exchangeRates);
     }
 
     @GetMapping("/{targetCurrency}")

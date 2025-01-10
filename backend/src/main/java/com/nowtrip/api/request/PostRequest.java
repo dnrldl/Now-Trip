@@ -18,6 +18,6 @@ public class PostRequest {
     @NotBlank(message = "내용은 필수입니다")
     private String content;
 
-    @Size(max = 3, min = 3, message = "국가 코드 3자리가 필요합니다")
+    @Size(max = 3, message = "국가 코드 3자리나 빈 문자열이 필요합니다")
     private String iso3Code;
 }

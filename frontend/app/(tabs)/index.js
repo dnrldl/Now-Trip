@@ -1,76 +1,82 @@
-import { router } from 'expo-router';
 import React from 'react';
 import {
-  Animated,
+  ActivityIndicator,
   Text,
-  View,
   StyleSheet,
-  ScrollView,
-  Button,
-  TouchableOpacity,
+  FlatList,
+  View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useExchangeRates } from '../../context/ExchangeRateContext';
 
 export default function HomeScreen() {
-  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const { exchangeRates, loading, error } = useExchangeRates();
 
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [60, 0], // 헤더의 높이를 스크롤에 따라 줄임
-    extrapolate: 'clamp',
-  });
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size='large' color='#0000ff' />
+        <Text>데이터를 로드 중입니다...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>오류가 발생했습니다: {error}</Text>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Animated.View style={[styles.header, { height: headerHeight }]}>
-        <Text style={styles.headerText}>헤더</Text>
-      </Animated.View>
-
-      <ScrollView
-        contentContainerStyle={{ paddingTop: 60 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
+    <View style={styles.container}>
+      <Text style={styles.title}>환율 정보</Text>
+      <FlatList
+        data={exchangeRates}
+        keyExtractor={(item, index) => `${item.targetCurrency}-${index}`}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text style={styles.currencyText}>
+              {item.targetCurrency}: {item.exchangeRate.toFixed(2)}
+            </Text>
+          </View>
         )}
-        scrollEventThrottle={16}
-      >
-        <TouchableOpacity onPress={() => router.push('test')}>
-          <Text>secure storage 테스트</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('protected')}>
-          <Text>보호된 페이지</Text>
-        </TouchableOpacity>
-
-        <View style={styles.content}>
-          <Text style={styles.contentText}>스크롤 가능한 컨텐츠</Text>
-          <Text style={styles.contentText}>스크롤 가능한 컨텐츠</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#6200ea',
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'left',
+    marginBottom: 20,
+  },
+  center: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10,
   },
-  headerText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  content: {
-    padding: 16,
-  },
-  contentText: {
+  errorText: {
+    color: 'red',
     fontSize: 16,
-    marginVertical: 100,
+    textAlign: 'center',
+  },
+  item: {
+    padding: 15,
+    backgroundColor: '#ffffff',
+    borderRadius: 5,
+    marginBottom: 10,
+    elevation: 2,
+  },
+  currencyText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

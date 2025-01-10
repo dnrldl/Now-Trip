@@ -29,7 +29,7 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment createComment(Long postId, String content) {
+    public void createComment(Long postId, String content) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다"));
 
@@ -37,7 +37,7 @@ public class CommentService {
                 .content(content)
                 .post(post)
                 .build();
-        return commentRepository.save(comment);
+        commentRepository.save(comment);
     }
 
     @Transactional
@@ -70,6 +70,7 @@ public class CommentService {
     private CommentResponse convertToCommentResponse(Comment comment) {
         return new CommentResponse(
                 comment.getId(),
+                comment.getPost().getId(),
                 comment.getContent(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),

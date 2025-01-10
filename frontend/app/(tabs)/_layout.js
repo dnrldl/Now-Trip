@@ -3,7 +3,15 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          paddingBottom: 0, // 하단 여백 제거
+          height: 55, // 탭바 높이 조정
+        },
+      }}
+    >
       <Tabs.Screen
         name='calculator'
         options={{
@@ -17,6 +25,15 @@ export default function TabsLayout() {
         name='index'
         options={{
           tabBarLabel: '홈',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name='home' size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name='posts'
+        options={{
+          tabBarLabel: '게시글',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='home' size={size} color={color} />
           ),
