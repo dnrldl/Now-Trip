@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,5 +27,5 @@ public class ExchangeRate {
     private BigDecimal exchangeRate;
 
     @Column(nullable = false)
-    private LocalDateTime lastUpdated;
+    private LocalDate lastUpdated;
 }

@@ -4,8 +4,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { AuthProvider } from '../context/AuthContext';
-import { ExchangeRateProvider } from '../context/ExchangeRateContext';
+import { AuthProvider } from '../contexts/AuthContext';
+import { ExchangeRateProvider } from '../contexts/ExchangeRateContext';
 import { SafeAreaView } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -37,6 +37,7 @@ export default function RootLayout() {
               options={{
                 headerShown: true,
                 headerBackButtonDisplayMode: 'minimal',
+                title: '로그인',
               }}
             />
             <Stack.Screen
@@ -44,11 +45,24 @@ export default function RootLayout() {
               options={{
                 headerShown: true,
                 headerBackButtonDisplayMode: 'minimal',
+                title: '회원가입',
               }}
             />
-
-            <Stack.Screen name='test' />
-            <Stack.Screen name='protected' />
+            {/* <Stack.Screen
+              name='exchangeDetails'
+              options={{
+                headerShown: true,
+                headerBackButtonDisplayMode: 'minimal',
+              }}
+            /> */}
+            <Stack.Screen
+              name='exchangeDetails'
+              options={{
+                headerShown: true,
+                headerBackButtonDisplayMode: 'minimal',
+                title: '환율 그래프',
+              }}
+            />
           </Stack>
           <StatusBar style='dark' />
         </ExchangeRateProvider>

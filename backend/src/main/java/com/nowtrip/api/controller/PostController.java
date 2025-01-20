@@ -18,23 +18,12 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
-//    @PostMapping
-//    public ResponseEntity<String> createPost(@RequestBody @Valid PostRequest request) {
-//        Long id = postService.createPost(request);
-//        return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
-//    }
-
     @PostMapping
     public ResponseEntity<String> createPostByCountry(@RequestBody @Valid PostRequest request) {
+        System.out.println("request = " + request.getIso3Code());
         Long id = postService.createPostByCountry(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
     }
-
-//    @GetMapping
-//    public ResponseEntity<List<PostResponse>> getAllPosts() {
-//        List<PostResponse> postResponses = postService.getPosts();
-//        return ResponseEntity.ok(postResponses);
-//    }
 
     @GetMapping
     public ResponseEntity<Page<PostResponse>> getAllPosts(
@@ -42,6 +31,14 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(postService.getPosts(page, size));
+    }
+
+    @GetMapping("/myPosts")
+    public ResponseEntity<Page<PostResponse>> getMyPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(postService.getMyPosts(page, size));
     }
 
     @GetMapping("/{id}")

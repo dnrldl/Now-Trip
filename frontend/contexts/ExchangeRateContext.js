@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { fetchExchangeRates } from '../api/exchangeRate';
 
 // Context 생성
 const ExchangeRateContext = createContext();
@@ -9,20 +10,19 @@ export const ExchangeRateProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const loadExchangeRates = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchExchangeRates();
+      setExchangeRates(response);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchExchangeRates = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/exchange/all');
-        const data = await response.json();
-        setExchangeRates(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExchangeRates();
+    loadExchangeRates();
   }, []);
 
   return (

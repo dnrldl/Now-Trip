@@ -10,6 +10,11 @@ export default function CommentList({ comments }) {
         data={comments}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <CommentItem comment={item} />}
+        ListEmptyComponent={
+          <Text style={styles.noComment}>
+            댓글이 없습니다. 첫 번째로 댓글을 달아보세요!
+          </Text>
+        }
       />
     </View>
   );
@@ -26,5 +31,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 10,
+  },
+  noComment: {
+    color: '#aaa',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });

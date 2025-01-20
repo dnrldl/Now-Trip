@@ -1,5 +1,5 @@
-import { Button, Text, View } from 'react-native';
-import React, { Component } from 'react';
+import { Button } from 'react-native';
+import React from 'react';
 import { router, Stack } from 'expo-router';
 
 export default function PostsLayout() {
@@ -21,7 +21,7 @@ export default function PostsLayout() {
           presentation: 'modal',
           headerShown: true,
           headerRight: () => (
-            <Button title='닫기' onPress={() => router.back()} />
+            <Button title='닫기' onPress={() => router.dismiss()} />
           ),
         }}
       />

@@ -4,13 +4,12 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  Button,
   TouchableOpacity,
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { fetchUserInfo } from '../../api/user';
-import { useAuth } from '../../context/AuthContext';
+import { fetchUserInfo } from '../../../api/user';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function MyPageScreen() {
   const [userInfo, setUserInfo] = useState(null); // 사용자 정보 저장
@@ -33,12 +32,18 @@ export default function MyPageScreen() {
   };
 
   useEffect(() => {
-    if (authState.isAuthenticated) {
-      getUserInfo();
-    } else {
-      Alert.alert('로그인 필요!', '로그인 페이지로 이동합니다');
-      router.push('/login');
+    if (!authState.isAuthenticated) {
+      Alert.alert('로그인 필요!', '로그인 후 이용해주세요.', [
+        {
+          text: '확인',
+          onPress: () => {
+            router.push('/login');
+          },
+        },
+      ]);
+      return;
     }
+    getUserInfo();
   }, []);
 
   // 비로그인 상태 처리
@@ -81,7 +86,7 @@ export default function MyPageScreen() {
           style={styles.logoutButton}
           onPress={async () => {
             await logout();
-            router.push('/login'); // 로그아웃 후 로그인 페이지로 이동
+            router.replace('/');
           }}
         >
           <Text style={styles.logoutText}>로그아웃</Text>
@@ -105,17 +110,23 @@ export default function MyPageScreen() {
               year: 'numeric',
               month: '2-digit',
               day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
             })}
           </Text>
 
           <TouchableOpacity
+            style={styles.myPostsButton}
+            onPress={() => {
+              router.push('/mypage/myPosts');
+            }}
+          >
+            <Text style={styles.myPostsText}>내 게시글</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.logoutButton}
             onPress={async () => {
-              // await deleteTokens();
               await logout();
-              router.push('/login'); // 로그아웃 후 로그인 페이지로 이동
+              router.replace('/');
             }}
           >
             <Text style={styles.logoutText}>로그아웃</Text>
@@ -175,6 +186,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  myPostsButton: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  myPostsText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',

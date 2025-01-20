@@ -21,7 +21,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     public List<CommentResponse> getCommentsByPostId(Long postId) {
-        List<Comment> comments = commentRepository.findByPostId(postId);
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         return comments.stream()
                 .map(this::convertToCommentResponse)
@@ -29,7 +29,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void createComment(Long postId, String content) {
+    public CommentResponse createComment(Long postId, String content) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다"));
 
@@ -38,6 +38,8 @@ public class CommentService {
                 .post(post)
                 .build();
         commentRepository.save(comment);
+
+        return convertToCommentResponse(comment);
     }
 
     @Transactional

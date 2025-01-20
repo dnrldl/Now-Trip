@@ -17,7 +17,7 @@ import java.util.Date;
 public class JwtProvider {
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
-    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60; // 한 시간
+    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60 * 12; // 12시간
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7; // 일주일
 
     public String generateAccessToken(String username, Long userId, Role role) {
@@ -33,7 +33,7 @@ public class JwtProvider {
         if (validateToken(refreshToken)) {
             return generateAccessToken(username, userId, role);
         }
-        throw new JwtException("Invalid refresh token or token expired");
+        throw new JwtException("토큰이 유효하지 않습니다");
     }
 
     public String generateToken(String username, Long userId, Role role, long validity) {
@@ -53,7 +53,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    // 토큰에서 사용자명 추출
+    // 토큰에서 사용자명(이메일) 추출
     public String extractUsername(String token) {
         return extractClaims(token).getSubject();
     }
@@ -63,13 +63,18 @@ public class JwtProvider {
         return Long.valueOf(claims.get("userId").toString());
     }
 
+    public Long extractExpiration(String token) {
+        Claims claims = extractClaims(token);
+        return claims.getExpiration().getTime();
+    }
+
     // 토큰에서 사용자 정보 추출
     public Claims extractClaims(String token) {
         return  Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody(); // 클레임 반환
+                .getBody();
     }
 
     public boolean validateToken(String token) {

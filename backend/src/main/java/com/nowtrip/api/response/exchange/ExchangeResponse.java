@@ -3,6 +3,7 @@ package com.nowtrip.api.response.exchange;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,5 +14,5 @@ import java.time.LocalDateTime;
 public class ExchangeResponse {
     private String targetCurrency;
     private BigDecimal exchangeRate;
-    private LocalDateTime lastUpdated;
+    private LocalDate lastUpdated;
 }

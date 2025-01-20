@@ -17,9 +17,9 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<String> createComment(@PathVariable Long postId, @RequestBody CommentRequest request) {
-        commentService.createComment(postId, request.getContent());
-        return ResponseEntity.status(HttpStatus.CREATED).body("id: " + postId + "의 댓글이 등록되었습니다");
+    public ResponseEntity<CommentResponse> createComment(@PathVariable Long postId, @RequestBody CommentRequest request) {
+        CommentResponse comment = commentService.createComment(postId, request.getContent());
+        return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
     @GetMapping

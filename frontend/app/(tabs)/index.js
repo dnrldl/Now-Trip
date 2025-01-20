@@ -5,11 +5,14 @@ import {
   StyleSheet,
   FlatList,
   View,
+  TouchableOpacity,
 } from 'react-native';
-import { useExchangeRates } from '../../context/ExchangeRateContext';
+import { useExchangeRates } from '../../contexts/ExchangeRateContext';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
   const { exchangeRates, loading, error } = useExchangeRates();
+  const router = useRouter();
 
   if (loading) {
     return (
@@ -35,11 +38,20 @@ export default function HomeScreen() {
         data={exchangeRates}
         keyExtractor={(item, index) => `${item.targetCurrency}-${index}`}
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.currencyText}>
-              {item.targetCurrency}: {item.exchangeRate.toFixed(2)}
-            </Text>
-          </View>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '/exchangeDetails',
+                params: { currency: item.targetCurrency },
+              })
+            }
+          >
+            <View style={styles.item}>
+              <Text style={styles.currencyText}>
+                {item.targetCurrency}: {item.exchangeRate.toFixed(2)}
+              </Text>
+            </View>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -53,7 +65,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'left',
     marginBottom: 20,

@@ -1,25 +1,26 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { login } from '../api/auth';
-import { AuthContext } from '../context/AuthContext';
+
+import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setTokens } = useContext(AuthContext);
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async () => {
     try {
-      const result = await login({ email, password });
-      const { accessToken, refreshToken } = result;
-      await setTokens(accessToken, refreshToken); // 토큰 저장
+      await login({ email, password });
+      // const response = await login({ email, password });
+      // const { accessToken, refreshToken } = response;
+      // await setTokens(accessToken, refreshToken); // 토큰 저장
       Alert.alert('로그인 성공', '환영합니다!');
-      router.push('/'); // 메인 화면으로 이동
+      router.replace('/'); // 메인 화면으로 이동
     } catch (error) {
-      console.log(error);
-      Alert.alert('로그인 실패', error.message || '오류가 발생했습니다.');
+      console.log(error.details.error);
+      Alert.alert('로그인 실패', error.details.error || '오류가 발생했습니다.');
     }
   };
 

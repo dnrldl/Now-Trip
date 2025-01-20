@@ -9,12 +9,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { fetchPosts } from '../../../api/post';
-import { useAuth } from '../../../contexts/AuthContext';
-import DateInfo from '../../../components/DateInfo';
+import { useRouter } from 'expo-router';
+import { fetchMyPosts } from '../../../../api/post';
+import DateInfo from '../../../../components/DateInfo';
 
-export default function PostsScreen() {
+export default function myPosts() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0); // 불러올 페이지 번호
   const [refreshing, setRefreshing] = useState(false); // 새로고침
@@ -23,7 +22,6 @@ export default function PostsScreen() {
   const [isLast, setIsLast] = useState(false); // 마지막 페이지인지 판별
   const [showUpBtn, setShowUpBtn] = useState(false); // 맨 위로 버튼
   const flatListRef = useRef(null);
-  const { authState } = useAuth();
   const router = useRouter();
 
   const initPosts = async () => {
@@ -32,7 +30,7 @@ export default function PostsScreen() {
       setPosts([]);
       setLoading(true);
 
-      const data = await fetchPosts(page);
+      const data = await fetchMyPosts(page);
       const postData = data.content;
 
       setIsLast(data.last);
@@ -46,43 +44,20 @@ export default function PostsScreen() {
     }
   };
 
-  const clickToAddPost = async () => {
-    if (!authState.isAuthenticated) {
-      Alert.alert('로그인 필요!', '로그인 후 이용해주세요.', [
-        {
-          text: '확인',
-          onPress: () => {
-            router.push('/login');
-          },
-        },
-      ]);
-      return;
-    }
-
-    router.push('/posts/addPost');
-  };
+  useEffect(() => {
+    setShowUpBtn(false);
+    initPosts();
+  }, []);
 
   const handleScroll = (event) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     setShowUpBtn(offsetY > 200);
   };
 
-  useEffect(() => {
-    setShowUpBtn(false);
-    initPosts();
-  }, []);
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     setShowUpBtn(false);
-  //     initPosts();
-  //   }, [])
-  // );
-
   const handleLoadMore = async () => {
     setPage(page + 1);
     try {
-      const data = await fetchPosts(page + 1);
+      const data = await fetchMyPosts(page + 1);
       const postData = data.content;
       const pageData = data.page;
 
@@ -126,13 +101,6 @@ export default function PostsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>게시판</Text>
-        <TouchableOpacity style={styles.addButton} onPress={clickToAddPost}>
-          <Text style={styles.addButtonText}>+ 작성</Text>
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         ref={flatListRef}
         data={posts}
@@ -142,7 +110,7 @@ export default function PostsScreen() {
             style={styles.postContainer}
             onPress={() =>
               router.push({
-                pathname: '/posts/details',
+                pathname: '/mypage/myPosts/details',
                 params: { postId: item.id.toString() },
               })
             }
@@ -163,7 +131,7 @@ export default function PostsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={1}
+        onEndReachedThreshold={0}
         ListFooterComponent={
           isLast && <Text style={styles.lastText}>마지막 게시글입니다.</Text>
         }
@@ -192,17 +160,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'left',
   },
   postTitle: {
     fontSize: 24,
@@ -234,17 +191,6 @@ const styles = StyleSheet.create({
   postInfo: {
     fontSize: 14,
     color: '#555',
-  },
-  addButton: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   lastText: {
     textAlign: 'center',

@@ -1,7 +1,5 @@
 import axios from 'axios';
 import { getToken } from '../utils/secureStore';
-import { Alert } from 'react-native';
-import { useContext } from 'react';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 

@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class ExchangeRateApiClient {
 
         // 시간 데이터 파싱
         long lastUpdateUnix = ((Number) rawResponse.get("time_last_update_unix")).longValue();
-        LocalDateTime lastUpdated = LocalDateTime.ofInstant(Instant.ofEpochSecond(lastUpdateUnix), ZoneId.of("UTC"));
+        LocalDate lastUpdated = LocalDate.ofInstant(Instant.ofEpochSecond(lastUpdateUnix), ZoneId.of("UTC"));
 
         // 중복 데이터 검증
         if (exchangeRateRepository.existsByLastUpdated(lastUpdated))

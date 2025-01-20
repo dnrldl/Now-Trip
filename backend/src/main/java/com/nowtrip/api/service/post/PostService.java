@@ -25,18 +25,20 @@ public class PostService {
     private final PostRepository postRepository;
     private final CountryRepository countryRepository;
 
-//    public List<PostResponse> getPosts() {
-//        List<Post> posts = postRepository.findAllWithoutComments();
-//
-//        return posts.stream()
-//                .map(this::convertToPostResponse)
-//                .collect(Collectors.toList());
-//    }
-
     // 페이징 처리
     public Page<PostResponse> getPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Post> posts = postRepository.findAllWithoutComments(pageable);
+
+        return posts.map(this::convertToPostResponse);
+    }
+
+
+    public Page<PostResponse> getMyPosts(int page, int size) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Post> posts = postRepository.findAllWithoutCommentsByEmail(email, pageable);
 
         return posts.map(this::convertToPostResponse);
     }
@@ -154,4 +156,6 @@ public class PostService {
         postRepository.saveAll(posts);
         System.out.println("대량의 테스트 데이터가 성공적으로 저장되었습니다");
     }
+
+
 }

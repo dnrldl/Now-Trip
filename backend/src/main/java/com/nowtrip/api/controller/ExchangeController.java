@@ -23,32 +23,31 @@ public class ExchangeController {
         return ResponseEntity.ok("환율을 성공적으로 저장했습니다");
     }
 
-    @GetMapping("/all")
+    // 가장 최신의 환율 모두 반환
+    @GetMapping
     public ResponseEntity<List<ExchangeResponse>> getExchangeRates() {
         List<ExchangeResponse> exchangeRates = exchangeRateService.getExchangeRates();
         return ResponseEntity.ok(exchangeRates);
     }
 
+    // 가장 최신의 환율 반환
     @GetMapping("/{targetCurrency}")
     public ResponseEntity<ExchangeResponse> getExchangeRate(@PathVariable String targetCurrency) {
         ExchangeResponse exchangeRate = exchangeRateService.getExchangeRate(targetCurrency);
         return ResponseEntity.ok(exchangeRate);
     }
 
-    @GetMapping("/history/{targetCurrency}")
-    public ResponseEntity<List<ExchangeResponse>> getExchangeRateHistory(@PathVariable String targetCurrency) {
-        List<ExchangeResponse> rates = exchangeRateService.getExchangeRateHistory(targetCurrency);
-        return ResponseEntity.ok(rates);
+    // 특정 통화의 환율 기록 반환
+    @GetMapping("/history")
+    public ResponseEntity<List<ExchangeResponse>> getExchangeRateHistory(
+            @RequestParam String targetCurrency,
+            @RequestParam(defaultValue = "weekly") String filter) {
+        List<ExchangeResponse> exchangeHistory = exchangeRateService.getExchangeRateHistory(
+                targetCurrency, filter);
+        return ResponseEntity.ok(exchangeHistory);
     }
 
-    /**
-     * 통화 변환 API
-     *
-     * @param fromCurrency 기준 통화 (예: KRW)
-     * @param toCurrency 대상 통화 (예: USD)
-     * @param amount 변환 금액
-     * @return 변환된 금액
-     */
+    // 통화 변환
     @GetMapping("/convert")
     public ResponseEntity<BigDecimal> convertCurrency(
             @RequestParam String fromCurrency,
