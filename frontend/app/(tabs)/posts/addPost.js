@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { addPost } from '../../../api/post';
+import { addPost } from '../../../api/postApi';
 import { useRouter } from 'expo-router';
 import DropDownPicker from 'react-native-dropdown-picker';
 

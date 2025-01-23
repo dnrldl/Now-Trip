@@ -41,7 +41,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             onPress={() =>
               router.push({
-                pathname: '/exchangeDetails',
+                pathname: '/exchange-details',
                 params: { currency: item.targetCurrency },
               })
             }

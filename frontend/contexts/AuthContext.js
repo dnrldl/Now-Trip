@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { saveToken, getToken, deleteToken } from '../utils/secureStore';
-import { loginRequest, logoutRequest, validateToken } from '../api/auth';
+import { loginRequest, logoutRequest, validateToken } from '../api/authApi';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 

@@ -10,10 +10,10 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { fetchMyPosts } from '../../../../api/post';
+import { deletePost, fetchMyPosts } from '../../../../api/postApi';
 import DateInfo from '../../../../components/DateInfo';
 
-export default function myPosts() {
+export default function MyPostsScreen() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0); // 불러올 페이지 번호
   const [refreshing, setRefreshing] = useState(false); // 새로고침
@@ -25,16 +25,14 @@ export default function myPosts() {
   const router = useRouter();
 
   const initPosts = async () => {
-    setPage(0);
+    setLoading(true);
+    setRefreshing(false);
     try {
-      setPosts([]);
-      setLoading(true);
-
-      const data = await fetchMyPosts(page);
+      const data = await fetchMyPosts(0);
       const postData = data.content;
 
-      setIsLast(data.last);
       setPosts(postData);
+      setIsLast(data.last);
       console.log('게시글 로드 완료');
     } catch (err) {
       setError('게시글을 불러오는 중 문제가 발생했습니다.');
@@ -55,8 +53,9 @@ export default function myPosts() {
   };
 
   const handleLoadMore = async () => {
-    setPage(page + 1);
+    if (isLast) return;
     try {
+      setPage((prevPage) => prevPage + 1);
       const data = await fetchMyPosts(page + 1);
       const postData = data.content;
       const pageData = data.page;
@@ -72,7 +71,6 @@ export default function myPosts() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-
     try {
       await initPosts();
     } catch (err) {
@@ -80,6 +78,29 @@ export default function myPosts() {
     } finally {
       setRefreshing(false);
     }
+  };
+
+  const onDelete = async (postId) => {
+    Alert.alert('정말 삭제하시겠습니까?', '', [
+      {
+        text: '취소',
+      },
+      {
+        text: '확인',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deletePost(postId);
+            setPosts((prevPosts) =>
+              prevPosts.filter((post) => post.id !== postId)
+            );
+            Alert.alert('삭제 완료', '게시글이 성공적으로 삭제되었습니다.');
+          } catch (err) {
+            Alert.alert('삭제 실패', '게시글 삭제 중 문제가 발생했습니다.');
+          }
+        },
+      },
+    ]);
   };
 
   if (loading) {
@@ -99,33 +120,51 @@ export default function myPosts() {
     );
   }
 
+  if (posts.length == 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.noContentText}>내 게시글이 없습니다.</Text>
+      </View>
+    );
+  }
+
+  const renderPost = ({ item }) => (
+    <View style={styles.postContainer}>
+      <TouchableOpacity
+        style={styles.postContent}
+        onPress={() =>
+          router.push({
+            pathname: '/mypage/my-posts/details',
+            params: { postId: item.id.toString() },
+          })
+        }
+      >
+        <Text style={styles.postTitle}>{item.title}</Text>
+        <Text>{item.createdBy}</Text>
+        <Text style={styles.postInfo}>
+          주제:{' '}
+          {item.country === 'Unknown Country' ? '자유 게시판' : item.country}
+        </Text>
+        <Text style={styles.postInfo}>
+          <DateInfo createdAt={item.createdAt} />
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => onDelete(item.id)}
+      >
+        <Text style={styles.deleteButtonText}>삭제</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={posts}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.postContainer}
-            onPress={() =>
-              router.push({
-                pathname: '/mypage/myPosts/details',
-                params: { postId: item.id.toString() },
-              })
-            }
-          >
-            <Text style={styles.postTitle}>{item.title}</Text>
-            <Text>{item.createdBy}</Text>
-            <Text style={styles.postInfo}>
-              주제:{' '}
-              {item.country == 'Unknown Country' ? '자유 게시판' : item.country}
-            </Text>
-            <Text style={styles.postInfo}>
-              <DateInfo createdAt={item.createdAt} />
-            </Text>
-          </TouchableOpacity>
-        )}
+        renderItem={renderPost}
         style={styles.list}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -138,6 +177,8 @@ export default function myPosts() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
+
+      {/* 맨 위로 버튼 */}
       {showUpBtn && (
         <TouchableOpacity
           style={styles.upBtn}
@@ -161,11 +202,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
-  postTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'left',
-  },
+
   list: {
     marginBottom: 20,
   },
@@ -179,18 +216,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   postContainer: {
-    backgroundColor: '#ffffff',
+    flexDirection: 'row', // 가로 정렬
+    alignItems: 'center', // 수직 중앙 정렬
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 15,
-    marginBottom: 15,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    height: 120,
+  },
+  postContent: {
+    flex: 1, // 남은 공간을 차지하도록 설정
+  },
+  postTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   postInfo: {
     fontSize: 14,
-    color: '#555',
+    color: '#666',
+    marginBottom: 5,
+  },
+  deleteButton: {
+    backgroundColor: '#FF5722', // 버튼 색상
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    height: 50,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   lastText: {
     textAlign: 'center',
@@ -209,5 +272,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  noContentText: {
+    color: '#555',
   },
 });

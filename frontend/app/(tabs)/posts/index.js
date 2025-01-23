@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { fetchPosts } from '../../../api/post';
+import { fetchPosts } from '../../../api/postApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import DateInfo from '../../../components/DateInfo';
 
@@ -27,12 +27,10 @@ export default function PostsScreen() {
   const router = useRouter();
 
   const initPosts = async () => {
-    setPage(0);
+    setLoading(true);
+    setRefreshing(false);
     try {
-      setPosts([]);
-      setLoading(true);
-
-      const data = await fetchPosts(page);
+      const data = await fetchPosts(0);
       const postData = data.content;
 
       setIsLast(data.last);
@@ -80,8 +78,9 @@ export default function PostsScreen() {
   // );
 
   const handleLoadMore = async () => {
-    setPage(page + 1);
+    if (isLast) return;
     try {
+      setPage((prevPage) => prevPage + 1);
       const data = await fetchPosts(page + 1);
       const postData = data.content;
       const pageData = data.page;
@@ -97,7 +96,6 @@ export default function PostsScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-
     try {
       await initPosts();
     } catch (err) {

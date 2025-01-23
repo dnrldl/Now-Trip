@@ -1,5 +1,6 @@
 package com.nowtrip.api.controller;
 
+import com.nowtrip.api.response.exchange.ExchangeRateDetailsResponse;
 import com.nowtrip.api.response.exchange.ExchangeResponse;
 import com.nowtrip.api.service.exchageRate.ExchangeRateApiClient;
 import com.nowtrip.api.service.exchageRate.ExchangeRateService;
@@ -38,11 +39,11 @@ public class ExchangeController {
     }
 
     // 특정 통화의 환율 기록 반환
-    @GetMapping("/history")
-    public ResponseEntity<List<ExchangeResponse>> getExchangeRateHistory(
+    @GetMapping("/history-change")
+    public ResponseEntity<ExchangeRateDetailsResponse> getExchangeRateHistoryWithChange(
             @RequestParam String targetCurrency,
             @RequestParam(defaultValue = "weekly") String filter) {
-        List<ExchangeResponse> exchangeHistory = exchangeRateService.getExchangeRateHistory(
+        ExchangeRateDetailsResponse exchangeHistory = exchangeRateService.getExchangeRateHistoryWithChange(
                 targetCurrency, filter);
         return ResponseEntity.ok(exchangeHistory);
     }

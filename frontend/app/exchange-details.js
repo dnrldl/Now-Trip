@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { fetchExchangeHistory } from '../api/exchangeRate';
+import { fetchExchangeHistoryWithChange } from '../api/exchangeRateApi';
 import { useLocalSearchParams } from 'expo-router';
 
 const screenWidth = Dimensions.get('window').width;
@@ -25,6 +25,7 @@ export default function ExchangeDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState('1주');
   const [data, setData] = useState([]);
+  const [change, setChange] = useState({});
   const [latestData, setLatestData] = useState(0);
   const [labels, setLabels] = useState([]);
   const { currency } = useLocalSearchParams();
@@ -32,15 +33,20 @@ export default function ExchangeDetailsScreen() {
   const fetchData = async (currency, filter) => {
     try {
       setIsLoading(true);
-      const response = await fetchExchangeHistory(currency, filter);
-      const rates = response.map((item) => item.exchangeRate);
-      const dates = response.map((item) => item.lastUpdated);
+      const response = await fetchExchangeHistoryWithChange(currency, filter);
+      const rateList = response.rateList;
+      setChange({
+        rateChange: response.rateChange,
+        rateChangePercentage: response.rateChangePercentage,
+      });
+
+      const rates = rateList.map((item) => item.exchangeRate);
+      const dates = rateList.map((item) => item.lastUpdated);
+      const labelCount = dates.length;
 
       setLatestData(rates.at(-1));
-
       setData(processDataForFilter(rates, filter));
 
-      const labelCount = dates.length;
       if (labelCount > 3) {
         const mid1 = dates[Math.floor(labelCount / 4)];
         const mid2 = dates[Math.floor((labelCount / 4) * 3)];
@@ -49,6 +55,7 @@ export default function ExchangeDetailsScreen() {
       } else {
         setLabels(dates); // 데이터가 너무 적으면 모든 라벨 표시
       }
+      console.log('환율 상세 데이터 로드 완료');
     } catch (error) {
       console.log('데이터 가져오기 실패: ', error);
     } finally {
@@ -56,6 +63,7 @@ export default function ExchangeDetailsScreen() {
     }
   };
 
+  // 요청하는 기간에 따라 데이터 처리
   const processDataForFilter = (rates, filter) => {
     if (filter === 'weekly') return rates;
     const smoothedData = smoothData(rates);
@@ -63,30 +71,32 @@ export default function ExchangeDetailsScreen() {
     return groupDataByInterval(smoothedData, interval);
   };
 
-  // 데이터를 스무딩 처리하는 함수 (이동 평균)
-  const smoothData = useCallback((data, smoothingFactor = 5) => {
+  const smoothData = useCallback((data, smoothingFactor = 3) => {
     if (data.length <= smoothingFactor) return data;
 
-    return data.map((_, index, array) => {
-      const start = Math.max(0, index - Math.floor(smoothingFactor / 2));
-      const end = Math.min(
-        array.length,
-        index + Math.ceil(smoothingFactor / 2)
-      );
-      const subset = array.slice(start, end);
-      return subset.reduce((sum, value) => sum + value, 0) / subset.length;
-    });
+    const smoothedData = [...data];
+    for (let i = 1; i < data.length - 1; i++) {
+      const start = Math.max(0, i - Math.floor(smoothingFactor / 2));
+      const end = Math.min(data.length, i + Math.ceil(smoothingFactor / 2));
+      const subset = data.slice(start, end);
+      smoothedData[i] =
+        subset.reduce((sum, value) => sum + value, 0) / subset.length;
+    }
+    return smoothedData;
   }, []);
 
-  // 데이터를 30일 간격으로 그룹화하는 함수
-  const groupDataByInterval = useCallback((data, interval = 30) => {
+  const groupDataByInterval = useCallback((data, interval) => {
+    if (data.length <= interval) return data;
+
     const groupedData = [];
-    for (let i = 0; i < data.length; i += interval) {
-      const subset = data.slice(i, i + interval);
+    groupedData.push(data[0]); // 첫 번째 값은 그대로 유지
+    for (let i = interval; i < data.length; i += interval) {
+      const subset = data.slice(i - interval, i);
       const average =
         subset.reduce((sum, value) => sum + value, 0) / subset.length;
       groupedData.push(average);
     }
+    groupedData.push(data[data.length - 1]); // 마지막 값은 그대로 유지
     return groupedData;
   }, []);
 
@@ -95,13 +105,76 @@ export default function ExchangeDetailsScreen() {
     fetchData(currency, initialFilter);
   }, [selectedTab]);
 
+  const getGraphColor = () => {
+    if (change.rateChange > 0) return '#FF4D4D'; // 빨간색
+    if (change.rateChange < 0) return '#007BFF'; // 파란색
+    return '#A9A9A9'; // 회색
+  };
+
+  const renderGraph = () => {
+    return (
+      <LineChart
+        data={{
+          labels,
+          datasets: [
+            {
+              data,
+              color: () => getGraphColor(), // 그래프 색상
+              strokeWidth: 2,
+            },
+          ],
+        }}
+        width={screenWidth - 40} // 화면 너비 조정
+        height={360}
+        chartConfig={{
+          backgroundColor: '#ffffff',
+          backgroundGradientFrom: '#ffffff',
+          backgroundGradientTo: '#ffffff',
+          color: () => getGraphColor(),
+          labelColor: () => '#555555',
+          decimalPlaces: 1, // 라벨 소숫점 자리
+          propsForBackgroundLines: {
+            strokeWidth: 0,
+          },
+
+          propsForBackgroundLines: {
+            strokeDasharray: '4',
+            stroke: '#ddd',
+            strokeWidth: 1,
+          },
+        }}
+        withDots={false}
+        bezier
+        style={styles.chart}
+      />
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* 상단 정보 */}
       <View style={styles.header}>
         <Text style={styles.title}>{currency}</Text>
-        <Text style={styles.currencyValue}>{latestData}원</Text>
-        <Text style={styles.subtext}>1월 17일보다 -33,000원 (7.8%)</Text>
+        <Text style={styles.curInfo}>1USD 기준</Text>
+        <Text style={styles.currencyValue}>{latestData.toFixed(2)}</Text>
+        <Text style={[styles.subtext, { color: getGraphColor() }]}>
+          {selectedTab === '1주'
+            ? '지난주보다'
+            : selectedTab === '3달'
+            ? '3달 전보다'
+            : selectedTab === '1년'
+            ? '1년 전보다'
+            : selectedTab === '전체'
+            ? ''
+            : ''}{' '}
+          {change.rateChange > 0
+            ? '+' +
+              change.rateChange +
+              ' (+' +
+              change.rateChangePercentage +
+              '%)'
+            : change.rateChange + ' (' + change.rateChangePercentage + '%)'}
+        </Text>
       </View>
 
       {/* 그래프 */}
@@ -111,39 +184,7 @@ export default function ExchangeDetailsScreen() {
           <Text>게시글을 불러오는 중입니다...</Text>
         </View> // <Text>Loading</Text>
       ) : (
-        <LineChart
-          data={{
-            labels,
-            datasets: [
-              {
-                data,
-                color: () => '#007BFF', // 라인 색상
-                strokeWidth: 2,
-              },
-            ],
-          }}
-          width={screenWidth - 40} // 화면 너비 조정
-          height={360}
-          chartConfig={{
-            backgroundColor: '#ffffff',
-            backgroundGradientFrom: '#ffffff',
-            backgroundGradientTo: '#ffffff',
-            color: () => '#007BFF',
-            labelColor: () => '#555555',
-            decimalPlaces: 1, // 라벨 소숫점 자리
-            propsForBackgroundLines: {
-              strokeWidth: 0,
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: '4', // 점선 스타일
-              stroke: '#ddd', // 눈금선 색상
-              strokeWidth: 1, // 눈금선 두께
-            },
-          }}
-          withDots={false}
-          bezier
-          style={styles.chart}
-        />
+        renderGraph()
       )}
 
       {/* 탭 */}
@@ -181,7 +222,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 5,
   },
   title: {
@@ -198,6 +239,10 @@ const styles = StyleSheet.create({
   subtext: {
     fontSize: 14,
     color: '#007BFF',
+  },
+  curInfo: {
+    fontSize: 12,
+    color: '#555',
   },
   chart: {
     borderRadius: 16,

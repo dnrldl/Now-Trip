@@ -43,7 +43,7 @@ public class AuthService {
 
             return new UserLoginResponse(accessToken, refreshToken);
         } catch (Exception ex) {
-            throw new BadCredentialsException("이메일 또는 비밀번호를 확인하세요", ex);
+            throw new IllegalArgumentException("이메일 또는 비밀번호를 확인하세요", ex);
         }
     }
 

@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { addComment, fetchComments, fetchPost } from '../api/post';
+import { addComment, fetchComments, fetchPost } from '../api/postApi';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import DateInfo from './DateInfo';
 import CommentList from './CommentList';

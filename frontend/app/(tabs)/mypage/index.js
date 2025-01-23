@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { fetchUserInfo } from '../../../api/user';
+import { fetchUserInfo } from '../../../api/userApi';
 import { useAuth } from '../../../contexts/AuthContext';
 
 export default function MyPageScreen() {
@@ -116,7 +116,7 @@ export default function MyPageScreen() {
           <TouchableOpacity
             style={styles.myPostsButton}
             onPress={() => {
-              router.push('/mypage/myPosts');
+              router.push('/mypage/my-posts');
             }}
           >
             <Text style={styles.myPostsText}>내 게시글</Text>

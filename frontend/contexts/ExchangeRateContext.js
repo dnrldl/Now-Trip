@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { fetchExchangeRates } from '../api/exchangeRate';
+import { fetchExchangeRates } from '../api/exchangeRateApi';
 
 // Context 생성
 const ExchangeRateContext = createContext();
@@ -21,6 +21,7 @@ export const ExchangeRateProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     loadExchangeRates();
   }, []);

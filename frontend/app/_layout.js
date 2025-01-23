@@ -48,15 +48,8 @@ export default function RootLayout() {
                 title: '회원가입',
               }}
             />
-            {/* <Stack.Screen
-              name='exchangeDetails'
-              options={{
-                headerShown: true,
-                headerBackButtonDisplayMode: 'minimal',
-              }}
-            /> */}
             <Stack.Screen
-              name='exchangeDetails'
+              name='exchange-details'
               options={{
                 headerShown: true,
                 headerBackButtonDisplayMode: 'minimal',

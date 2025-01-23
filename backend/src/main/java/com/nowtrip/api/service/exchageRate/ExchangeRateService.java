@@ -2,6 +2,7 @@ package com.nowtrip.api.service.exchageRate;
 
 import com.nowtrip.api.entity.ExchangeRate;
 import com.nowtrip.api.repository.ExchangeRateRepository;
+import com.nowtrip.api.response.exchange.ExchangeRateDetailsResponse;
 import com.nowtrip.api.response.exchange.ExchangeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,14 +30,15 @@ public class ExchangeRateService {
     }
 
     // 특정 통화의 시간별 환율 조회
-    public List<ExchangeResponse> getExchangeRateHistory(String targetCurrency, String filter) {
+    public ExchangeRateDetailsResponse getExchangeRateHistoryWithChange(String targetCurrency, String filter) {
+        // 필터에 따라 구할 환율의 기간 지정
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = switch (filter) {
             case "weekly" -> endDate.minusWeeks(1);
             case "monthly" -> endDate.minusMonths(3);
             case "yearly" -> endDate.minusYears(1);
             case "all" -> LocalDate.of(1970,1,1);
-            default -> // "daily" or invalid filter
+            default ->
                     endDate.minusWeeks(1);
         };
 
@@ -45,13 +47,29 @@ public class ExchangeRateService {
         if (exchangeRates.isEmpty())
             throw new IllegalArgumentException("환율 정보를 찾을 수 없습니다");
 
-        return exchangeRates.stream()
+        List<ExchangeResponse> exchangeRateList = exchangeRates.stream()
                 .map(rate -> new ExchangeResponse(
                         rate.getTargetCurrency(),
                         rate.getExchangeRate(),
                         rate.getLastUpdated()
                 ))
-                .collect(Collectors.toList());
+                .toList();
+
+        // 환율 변동 구하기
+        ExchangeRate latestRate = exchangeRates.get(exchangeRates.size() - 1); // 최신 환율 (endDate)
+        ExchangeRate previousRate = exchangeRates.get(0); // 과거 환율 (startDate)
+
+        // 최신 환율 - 과거 환율
+        BigDecimal rateChange = latestRate.getExchangeRate().subtract(previousRate.getExchangeRate()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal rateChangePercentage = rateChange
+                .multiply(BigDecimal.valueOf(100))
+                .divide(previousRate.getExchangeRate(), 2, RoundingMode.HALF_UP);
+
+        return new ExchangeRateDetailsResponse(
+                exchangeRateList,
+                rateChange,
+                rateChangePercentage
+        );
     }
 
 
@@ -108,11 +126,11 @@ public class ExchangeRateService {
 
         LocalDate endDate = LocalDate.now();
         for (int i = 0; i < 730; i++) {
-            testRates.add(createExchangeRate("KRW", endDate.minusDays(i), 1200.0, 1500.0));
-            testRates.add(createExchangeRate("JPY", endDate.minusDays(i), 100.0, 160.0));
-            testRates.add(createExchangeRate("CNY", endDate.minusDays(i), 170.0, 220.0));
+            testRates.add(createExchangeRate("KRW", endDate.minusDays(i), 1400.0, 1500.0));
+            testRates.add(createExchangeRate("JPY", endDate.minusDays(i), 120.0, 160.0));
+            testRates.add(createExchangeRate("CNY", endDate.minusDays(i), 180.0, 220.0));
             testRates.add(createExchangeRate("THB", endDate.minusDays(i), 30.0, 40.0));
-            testRates.add(createExchangeRate("VND", endDate.minusDays(i), 20000.0, 25000.0));
+            testRates.add(createExchangeRate("VND", endDate.minusDays(i), 23000.0, 25000.0));
             testRates.add(createExchangeRate("PHP", endDate.minusDays(i), 50.0, 60.0));
             testRates.add(createExchangeRate("IDR", endDate.minusDays(i), 14000.0, 15000.0));
             testRates.add(createExchangeRate("SGD", endDate.minusDays(i), 1.3, 1.5));

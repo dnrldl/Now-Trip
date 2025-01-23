@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { register } from '../api/auth';
+import { register } from '../api/authApi';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');

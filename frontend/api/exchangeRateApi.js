@@ -12,9 +12,9 @@ export const fetchExchangeRates = async () => {
   }
 };
 
-export const fetchExchangeHistory = async (currency, filter) => {
+export const fetchExchangeHistoryWithChange = async (currency, filter) => {
   try {
-    const response = await publicAxios.get(PATH + '/history', {
+    const response = await publicAxios.get(PATH + '/history-change', {
       params: {
         targetCurrency: currency,
         filter,

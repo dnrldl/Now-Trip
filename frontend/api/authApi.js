@@ -1,5 +1,6 @@
 import { privateAxios, publicAxios } from './axiosInstance';
 import handleError from './handleApiError';
+
 export const register = async (userData) => {
   try {
     const response = await publicAxios.post('/users/register', userData);
