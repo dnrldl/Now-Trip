@@ -26,6 +26,7 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
             ")")
     List<ExchangeRate> findLatestRates();
 
+    // 특정 기간동안의 환율 데이터들을 반환
     @Query("SELECT e FROM ExchangeRate e " +
             "WHERE e.targetCurrency = :targetCurrency " +
             "AND e.lastUpdated BETWEEN :startDate AND :endDate " +

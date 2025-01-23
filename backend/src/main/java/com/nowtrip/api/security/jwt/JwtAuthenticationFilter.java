@@ -1,5 +1,7 @@
 package com.nowtrip.api.security.jwt;
 
+import com.nowtrip.api.security.CustomUserDetails;
+import com.nowtrip.api.security.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -30,6 +33,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final RedisTemplate<String, String> redisTemplate;
+    private final CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -42,10 +46,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (isTokenBlacklisted(token))
                     throw new IllegalArgumentException("블랙리스트에 있는 토큰입니다");
 
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        jwtProvider.extractUsername(token), null, null
+                String email = jwtProvider.extractUsername(token);
+                CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
+
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
                 );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (ExpiredJwtException ex) {
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
                 return;

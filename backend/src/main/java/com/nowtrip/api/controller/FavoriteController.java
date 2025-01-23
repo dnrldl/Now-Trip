@@ -1,6 +1,6 @@
 package com.nowtrip.api.controller;
 
-import com.nowtrip.api.entity.Favorite;
+import com.nowtrip.api.response.favorite.FavoriteResponse;
 import com.nowtrip.api.service.favorite.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +16,22 @@ public class FavoriteController {
 
     // 즐겨찾기 추가
     @PostMapping
-    public ResponseEntity<Favorite> addFavorite(@RequestParam Long userId, @RequestParam Long countryId) {
-        Favorite favorite = favoriteService.addFavorite(userId, countryId);
+    public ResponseEntity<FavoriteResponse> addFavorite(@RequestParam Long countryId) {
+        FavoriteResponse favorite = favoriteService.addFavorite(countryId);
         return ResponseEntity.ok(favorite);
     }
 
     // 즐겨찾기 삭제
-    @DeleteMapping
-    public ResponseEntity<String> removeFavorite(@RequestParam Long userId, @RequestParam Long countryId) {
-        favoriteService.removeFavorite(userId, countryId);
+    @DeleteMapping("/{countryId}")
+    public ResponseEntity<String> removeFavorite(@PathVariable Long countryId) {
+        favoriteService.removeFavorite(countryId);
         return ResponseEntity.ok("즐겨찾기에서 삭제되었습니다.");
     }
 
     // 유저의 즐겨찾기 목록 조회
     @GetMapping
-    public ResponseEntity<List<Favorite>> getFavorites(@RequestParam Long userId) {
-        List<Favorite> favorites = favoriteService.getFavorites(userId);
+    public ResponseEntity<List<FavoriteResponse>> getFavorites() {
+        List<FavoriteResponse> favorites = favoriteService.getFavorites();
         return ResponseEntity.ok(favorites);
     }
 }

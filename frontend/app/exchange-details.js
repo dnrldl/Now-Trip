@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { fetchExchangeHistoryWithChange } from '../api/exchangeRateApi';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -29,6 +29,7 @@ export default function ExchangeDetailsScreen() {
   const [latestData, setLatestData] = useState(0);
   const [labels, setLabels] = useState([]);
   const { currency } = useLocalSearchParams();
+  const router = useRouter();
 
   const fetchData = async (currency, filter) => {
     try {
@@ -208,8 +209,11 @@ export default function ExchangeDetailsScreen() {
       </View>
 
       {/* 하단 버튼 */}
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>즐겨찾기</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.replace('/posts')}
+      >
+        <Text style={styles.buttonText}>관련 게시글 보러 가기</Text>
       </TouchableOpacity>
     </View>
   );
@@ -271,7 +275,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   button: {
-    backgroundColor: '#FF4D4D',
+    backgroundColor: '#007BFF',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
