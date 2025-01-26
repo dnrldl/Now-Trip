@@ -2,6 +2,7 @@ package com.nowtrip.api.service.post;
 
 import com.nowtrip.api.entity.Country;
 import com.nowtrip.api.entity.Post;
+import com.nowtrip.api.repository.CommentRepository;
 import com.nowtrip.api.repository.CountryRepository;
 import com.nowtrip.api.repository.PostRepository;
 import com.nowtrip.api.request.PostRequest;
@@ -24,8 +25,9 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final CountryRepository countryRepository;
+    private final CommentRepository commentRepository;
 
-    // 페이징 처리
+    // 게시글 조회 (메인 화면)
     public Page<PostResponse> getPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Post> posts = postRepository.findAllWithoutComments(pageable);
@@ -33,7 +35,7 @@ public class PostService {
         return posts.map(this::convertToPostResponse);
     }
 
-
+    // 게시글 조회 (내 게시글)
     public Page<PostResponse> getMyPosts(int page, int size) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -43,6 +45,7 @@ public class PostService {
         return posts.map(this::convertToPostResponse);
     }
 
+    // 게시글 조회 (단일)
     public PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
@@ -61,11 +64,13 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    // 등록
     public Long createPostByCountry(PostRequest request) {
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
 
+        // 국가 코드
         if (request.getIso3Code() == null || request.getIso3Code().trim().isEmpty()) {
             post.setCountry(null);
         } else {
@@ -77,6 +82,7 @@ public class PostService {
         return postRepository.save(post).getId();
     }
 
+    // 변경
     public void updatePost(Long id, PostRequest request) {
         Post savedPost = postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
@@ -92,6 +98,7 @@ public class PostService {
         postRepository.save(savedPost);
     }
 
+    // 삭제
     public void deletePost(Long id) {
         Post savedPost = postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
@@ -107,16 +114,6 @@ public class PostService {
 
 
     private PostResponse convertToPostResponse(Post post) {
-//        List<CommentResponse> commentResponses = post.getComments().stream()
-//                .map(comment -> new CommentResponse(
-//                        comment.getId(),
-//                        comment.getContent(),
-//                        comment.getCreatedAt(),
-//                        comment.getUpdatedAt(),
-//                        comment.getCreatedBy(),
-//                        comment.getModifiedBy()
-//                )).collect(Collectors.toList());
-
         String countryName = Optional.ofNullable(post.getCountry())
                 .map(Country::getCountryName)
                 .orElse("Unknown Country");
@@ -126,20 +123,24 @@ public class PostService {
                 post.getTitle(),
                 post.getContent(),
                 countryName,
-//                commentResponses,
                 post.getCreatedAt(),
-                post.getUpdatedAt(),
                 post.getCreatedBy(),
-                post.getModifiedBy()
+                post.getLikeCount(),
+                post.getCommentCount()
         );
     }
 
-    public Post createTestPosts(String title, String content) {
-        Post post = Post.builder()
+
+    /**
+     * 테스트 코드
+     */
+    public Post createTestPosts(String title, String content, Integer likes, Integer comments) {
+        return Post.builder()
                 .title(title)
                 .content(content)
+                .likeCount(likes)
+                .commentCount(comments)
                 .build();
-        return post;
     }
 
     public void generateTestData() {
@@ -149,7 +150,7 @@ public class PostService {
         List<Post> posts = new ArrayList<>();
 
         for (int i = 0; i < 50; i++) {
-            posts.add(createTestPosts("테스트" + (i+1), "테스트 내용"));
+            posts.add(createTestPosts("테스트" + (i+1), "테스트 내용", i, i));
         }
 
         // 데이터 저장

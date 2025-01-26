@@ -24,7 +24,7 @@ public class FavoriteService {
     private final AuthenticationHelper authenticationHelper;
 
     public FavoriteResponse addFavorite(Long countryId) {
-        Long userId = authenticationHelper.getCurrentUserId();
+        Long userId = authenticationHelper.getCurrentUser().getUserId();
 
         if (favoriteRepository.existsByUserIdAndCountryId(userId, countryId)) {
             throw new IllegalStateException("이미 즐겨찾기에 추가된 국가입니다.");
@@ -53,7 +53,7 @@ public class FavoriteService {
     }
 
     public List<FavoriteResponse> getFavorites() {
-        Long userId = authenticationHelper.getCurrentUserId();
+        Long userId = authenticationHelper.getCurrentUser().getUserId();
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
 
         return favorites.stream().map(favorite ->

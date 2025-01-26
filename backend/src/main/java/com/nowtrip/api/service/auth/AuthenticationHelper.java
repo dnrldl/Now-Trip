@@ -7,14 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticationHelper {
-    public Long getCurrentUserId() {
+    public CustomUserDetails getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof CustomUserDetails) {
-            CustomUserDetails userDetails = (CustomUserDetails) principal;
-            Long userId = userDetails.getUserId();
-            return userId;
+            return (CustomUserDetails) principal;
         } else {
             throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
         }

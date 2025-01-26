@@ -18,7 +18,7 @@ public class PostResponse {
     private String content;
     private String country;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private String createdBy;
-    private String modifiedBy;
+    private Integer likeCount;
+    private Integer commentCount;
 }

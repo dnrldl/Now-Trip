@@ -34,5 +34,9 @@ public class User extends Auditable{
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    public User(Long userId) {
+        this.id = userId;
+    }
 }
 

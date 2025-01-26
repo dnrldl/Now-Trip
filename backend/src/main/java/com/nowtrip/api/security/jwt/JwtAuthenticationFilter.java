@@ -69,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isTokenBlacklisted(String token) {
-        return redisTemplate.hasKey("blacklist:" + token);
+        return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + token));
     }
 
     private String extractTokenFromHeader(HttpServletRequest request) {

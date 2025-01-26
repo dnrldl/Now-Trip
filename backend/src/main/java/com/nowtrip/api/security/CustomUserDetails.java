@@ -18,6 +18,10 @@ public class CustomUserDetails implements UserDetails {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
     }
 
+    public User getUser() {
+        return user;
+    }
+
     public Long getUserId() { return user.getId(); }
 
     public String getNickname() {
