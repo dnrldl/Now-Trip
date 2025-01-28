@@ -3,9 +3,20 @@ import handleError from './handleApiError';
 
 const PATH = '/posts';
 
-export const fetchPosts = async (page) => {
+export const fetchPublicPosts = async (page) => {
   try {
     const response = await publicAxios.get(PATH, {
+      params: { page },
+    });
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const fetchPrivatePosts = async (page) => {
+  try {
+    const response = await privateAxios.get(PATH, {
       params: { page },
     });
     return response.data;
@@ -72,6 +83,18 @@ export const addComment = async (postId, content) => {
 export const deletePost = async (postId) => {
   try {
     const response = await privateAxios.delete(PATH + '/' + postId);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const toggleLike = async (postId) => {
+  try {
+    const response = await privateAxios.post(
+      PATH + '/' + postId + '/like-toggle'
+    );
+    return response.data;
   } catch (error) {
     handleError(error);
   }

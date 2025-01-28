@@ -45,6 +45,11 @@ public class LikeService {
         }
     }
 
+    public boolean isLiked(Long postId) {
+        Long userId = authenticationHelper.getCurrentUser().getUserId();
+        return likeRepository.existsByPostIdAndUserId(postId, userId);
+    }
+
     // 좋아요 수 검증
     @Transactional
     public void recalculateLikeCount(Long postId) {

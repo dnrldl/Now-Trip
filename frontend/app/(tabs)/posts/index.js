@@ -10,9 +10,10 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { fetchPosts } from '../../../api/postApi';
+import { fetchPrivatePosts, fetchPublicPosts } from '../../../api/postApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import DateInfo from '../../../components/DateInfo';
+import PostAction from '../../../components/PostAction';
 
 export default function PostsScreen() {
   const [posts, setPosts] = useState([]);
@@ -25,6 +26,13 @@ export default function PostsScreen() {
   const flatListRef = useRef(null);
   const { authState } = useAuth();
   const router = useRouter();
+  let fetchPosts;
+
+  if (authState.isAuthenticated) {
+    fetchPosts = fetchPrivatePosts;
+  } else {
+    fetchPosts = fetchPublicPosts;
+  }
 
   const initPosts = async () => {
     setLoading(true);
@@ -35,6 +43,7 @@ export default function PostsScreen() {
 
       setIsLast(data.last);
       setPosts(postData);
+
       console.log('게시글 로드 완료');
     } catch (err) {
       setError('게시글을 불러오는 중 문제가 발생했습니다.');
@@ -154,6 +163,9 @@ export default function PostsScreen() {
             <Text style={styles.postInfo}>
               <DateInfo createdAt={item.createdAt} />
             </Text>
+
+            {/* 좋아요, 댓글 수 */}
+            <PostAction post={item} authState={authState} />
           </TouchableOpacity>
         )}
         style={styles.list}
@@ -244,6 +256,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+
   lastText: {
     textAlign: 'center',
     color: '#555',

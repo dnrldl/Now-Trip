@@ -74,7 +74,6 @@ export default function PostDetails() {
       <CommentList comments={comments} />
 
       {/* 댓글 입력 부분 */}
-
       <CommentInput onSubmit={handleAddComment} />
     </View>
   );

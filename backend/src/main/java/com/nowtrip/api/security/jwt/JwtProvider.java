@@ -17,7 +17,7 @@ import java.util.Date;
 public class JwtProvider {
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
-    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60 * 12; // 12시간
+    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60 * 24; // 24시간
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7; // 일주일
 
     public String generateAccessToken(String username, Long userId, Role role) {

@@ -4,9 +4,11 @@ import com.nowtrip.api.entity.Country;
 import com.nowtrip.api.entity.Post;
 import com.nowtrip.api.repository.CommentRepository;
 import com.nowtrip.api.repository.CountryRepository;
+import com.nowtrip.api.repository.LikeRepository;
 import com.nowtrip.api.repository.PostRepository;
 import com.nowtrip.api.request.PostRequest;
 import com.nowtrip.api.response.post.PostResponse;
+import com.nowtrip.api.service.auth.AuthenticationHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +27,9 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final CountryRepository countryRepository;
-    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
+    private final AuthenticationHelper authenticationHelper;
+    private static final String UNKNOWN_COUNTRY = "Unknown Country";
 
     // 게시글 조회 (메인 화면)
     public Page<PostResponse> getPosts(int page, int size) {
@@ -116,7 +120,14 @@ public class PostService {
     private PostResponse convertToPostResponse(Post post) {
         String countryName = Optional.ofNullable(post.getCountry())
                 .map(Country::getCountryName)
-                .orElse("Unknown Country");
+                .orElse(UNKNOWN_COUNTRY);
+        boolean isLiked = false;
+
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
+            Long currentUserId = authenticationHelper.getCurrentUser().getUserId();
+            isLiked = likeRepository.existsByPostIdAndUserId(post.getId(), currentUserId);
+        }
 
         return new PostResponse(
                 post.getId(),
@@ -126,7 +137,8 @@ public class PostService {
                 post.getCreatedAt(),
                 post.getCreatedBy(),
                 post.getLikeCount(),
-                post.getCommentCount()
+                post.getCommentCount(),
+                isLiked
         );
     }
 
@@ -134,12 +146,12 @@ public class PostService {
     /**
      * 테스트 코드
      */
-    public Post createTestPosts(String title, String content, Integer likes, Integer comments) {
+    public Post createTestPosts(String title, String content) {
         return Post.builder()
                 .title(title)
                 .content(content)
-                .likeCount(likes)
-                .commentCount(comments)
+                .commentCount(0)
+                .likeCount(0)
                 .build();
     }
 
@@ -150,7 +162,7 @@ public class PostService {
         List<Post> posts = new ArrayList<>();
 
         for (int i = 0; i < 50; i++) {
-            posts.add(createTestPosts("테스트" + (i+1), "테스트 내용", i, i));
+            posts.add(createTestPosts("테스트" + (i+1), "테스트 내용"));
         }
 
         // 데이터 저장

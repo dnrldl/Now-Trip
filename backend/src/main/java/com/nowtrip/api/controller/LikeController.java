@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -19,5 +18,11 @@ public class LikeController {
     public ResponseEntity<LikeResponse> toggleLike(@PathVariable Long postId) {
         LikeResponse response = likeService.toggleLike(postId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{postId}/likes/status")
+    public ResponseEntity<Map<String, Boolean>> getLikeStatus(@PathVariable Long postId) {
+        boolean isLiked = likeService.isLiked(postId);
+        return ResponseEntity.ok(Map.of("isLiked", isLiked));
     }
 }

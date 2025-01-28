@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -21,4 +20,5 @@ public class PostResponse {
     private String createdBy;
     private Integer likeCount;
     private Integer commentCount;
+    private boolean isLiked;
 }
