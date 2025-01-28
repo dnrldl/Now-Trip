@@ -36,8 +36,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .exceptionHandling(handle -> handle.authenticationEntryPoint(customAuthenticationEntryPoint))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/users/register", "/api/auth/login", "/api/auth/refresh",
-                                "/api/auth/validate-token", "/api/favorites/**",
+                        .requestMatchers("/api/users/register", "/api/auth/login", "/api/auth/refresh-token",
+                                "/api/auth/validate-token",
                                 "/api/exchange/**", "/api/values/**", "/api/ppp/**",
                                 "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()

@@ -76,19 +76,23 @@ public class AuthService {
 
     // TODO Access 토큰 발급 받고 기존에 있는 토큰 블랙리스트에 추가
     public String refreshAccessToken(String refreshToken) {
+        // 리프레시 토큰에서 id, email 추출
         Long userId = jwtProvider.extractUserId(refreshToken);
         String email = jwtProvider.extractUsername(refreshToken);
 
+        // redis에 저장된 리프레시 토큰 호출
         String storedToken = redisTemplate.opsForValue().get("refreshToken:" + userId);
-        String accessToken = jwtProvider.refreshAccessToken(refreshToken, email, userId, Role.USER);
-        if (storedToken == null) {
-            throw new BadCredentialsException("redis에 저장된 refresh 토큰이 없습니다");
-        }
-        if (!storedToken.equals(refreshToken)) {
-            throw new BadCredentialsException("redis에 저장된 refresh 토큰이 일치하지 않습니다");
-        }
+        // 리프레시 토큰으로 엑세스 토큰 재발급
+        String newAccessToken = jwtProvider.refreshAccessToken(refreshToken, email, userId, Role.USER);
 
-        return accessToken;
+        if (storedToken == null)
+            throw new BadCredentialsException("redis에 저장된 refresh 토큰이 없습니다");
+
+        if (!storedToken.equals(refreshToken))
+            throw new BadCredentialsException("redis에 저장된 refresh 토큰이 일치하지 않습니다");
+
+
+        return newAccessToken;
     }
 }
 

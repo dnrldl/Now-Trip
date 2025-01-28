@@ -37,20 +37,19 @@ export default function AddPostScreen() {
 
     try {
       const response = await addPost({ title, content, iso3Code });
-      console.log('게시글 작성 요청:', iso3Code);
       console.log('게시글 작성 결과:', response);
       Alert.alert('게시글 등록', '게시글이 등록되었습니다.');
       router.dismiss();
     } catch (error) {
-      console.warn('에러 발생:', error);
+      console.warn('에러 발생:', error.error);
       if (error.details.title != null) {
         Alert.alert('제목 길이 오류', '제목은 최대 50자까지 입력 가능합니다!');
         return;
       }
 
-      if (error.status === 401) {
+      if (error.status === 401 || error.error == 'Unauthorized') {
         Alert.alert('세션 만료', '로그인이 필요합니다.');
-        router.push('/login'); // 로그인 페이지로 이동
+        router.back();
       } else {
         Alert.alert('에러 발생', '게시글 작성 중 문제가 발생했습니다.');
       }

@@ -31,10 +31,10 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "로그아웃 성공"));
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<String> refreshToken(@RequestParam String refreshToken) {
-        String newAccessToken = authService.refreshAccessToken(refreshToken);
-        return ResponseEntity.ok(newAccessToken);
+    @PostMapping("/refresh-token")
+    public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> request) {
+        String newAccessToken = authService.refreshAccessToken(request.get("refreshToken"));
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
     @GetMapping("/validate-token")

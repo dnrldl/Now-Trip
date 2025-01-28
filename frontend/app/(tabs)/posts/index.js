@@ -24,7 +24,7 @@ export default function PostsScreen() {
   const [isLast, setIsLast] = useState(false); // 마지막 페이지인지 판별
   const [showUpBtn, setShowUpBtn] = useState(false); // 맨 위로 버튼
   const flatListRef = useRef(null);
-  const { authState } = useAuth();
+  const { authState, loadTokens } = useAuth();
   const router = useRouter();
   let fetchPosts;
 
@@ -54,13 +54,11 @@ export default function PostsScreen() {
   };
 
   const clickToAddPost = async () => {
+    loadTokens();
     if (!authState.isAuthenticated) {
       Alert.alert('로그인 필요!', '로그인 후 이용해주세요.', [
         {
           text: '확인',
-          onPress: () => {
-            router.push('/login');
-          },
         },
       ]);
       return;
@@ -75,6 +73,7 @@ export default function PostsScreen() {
   };
 
   useEffect(() => {
+    loadTokens();
     setShowUpBtn(false);
     initPosts();
   }, []);
@@ -87,6 +86,7 @@ export default function PostsScreen() {
   // );
 
   const handleLoadMore = async () => {
+    loadTokens();
     if (isLast) return;
     try {
       setPage((prevPage) => prevPage + 1);

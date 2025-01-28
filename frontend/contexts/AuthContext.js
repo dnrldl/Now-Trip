@@ -3,6 +3,7 @@ import { saveToken, getToken, deleteToken } from '../utils/secureStore';
 import { loginRequest, logoutRequest, validateToken } from '../api/authApi';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { publicAxios } from '../api/axiosInstance';
 
 const AuthContext = createContext();
 
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }) => {
       const response = await logoutRequest();
       await deleteTokens();
       Alert.alert(response.message);
-    } catch (err) {
+    } catch (error) {
       console.error('로그아웃:', error.response?.data || error.message);
       throw error;
     }
@@ -61,7 +62,11 @@ export const AuthProvider = ({ children }) => {
       refreshToken: null,
       isAuthenticated: false,
     });
-    console.log('로그아웃 성공');
+    console.log('토큰 삭제');
+  };
+
+  const updateAuthState = (newState) => {
+    setAuthState(newState);
   };
 
   const loadTokens = async () => {
@@ -70,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     const refreshToken = await getToken(REFRESH);
 
     if (!accessToken || !refreshToken) {
-      console.log('비 로그인 상태:앱 실행시 토큰이 없습니다.');
+      console.log('비 로그인 상태:토큰이 없습니다.');
       return;
     }
 
@@ -89,19 +94,41 @@ export const AuthProvider = ({ children }) => {
       // 토큰 만료시
       console.log('토큰이 유효하지 않습니다.');
       await deleteTokens();
-      Alert.alert('세션 만료', '로그인이 필요합니다.', [
+      Alert.alert('세션 만료', '다시 로그인이 필요합니다.', [
         {
           text: '확인',
-          onPress: () => {
-            router.push('/login');
-          },
         },
       ]);
     }
   };
 
   // 리프레시 토큰으로 엑세스 토큰 갱신
-  const refreshAccessToken = async () => {};
+  const refreshAccessToken = async () => {
+    try {
+      const response = await publicAxios.post('/api/auth/refresh-token', {
+        refreshToken: authState.refreshToken,
+      });
+
+      const newAccessToken = response.data.accessToken;
+
+      setAuthState((prevState) => ({
+        ...prevState,
+        accessToken: newAccessToken,
+        isAuthenticated: true,
+      }));
+
+      return newAccessToken;
+    } catch (error) {
+      console.error('토큰 갱신 실패:', error);
+      setAuthState({
+        isAuthenticated: false,
+        accessToken: null,
+        refreshToken: null,
+      });
+
+      throw error;
+    }
+  };
 
   // 앱 로드 시 실행
   useEffect(() => {
@@ -110,7 +137,14 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ authState, login, logout, refreshAccessToken }}
+      value={{
+        authState,
+        login,
+        logout,
+        refreshAccessToken,
+        updateAuthState,
+        loadTokens,
+      }}
     >
       {children}
     </AuthContext.Provider>
