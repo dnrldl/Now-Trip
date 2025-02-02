@@ -146,6 +146,7 @@ public class PostService {
                     post.getCreatedBy(),
                     post.getLikeCount(),
                     post.getCommentCount(),
+                    post.getViewCount(),
                     isLiked
             );
         });
@@ -173,6 +174,7 @@ public class PostService {
                 post.getCreatedBy(),
                 post.getLikeCount(),
                 post.getCommentCount(),
+                post.getViewCount(),
                 isLiked
         );
     }

@@ -41,6 +41,9 @@ public class Post extends Auditable {
     @Column(nullable = false)
     private Integer commentCount = 0;
 
+    @Column(nullable = false)
+    private Integer viewCount = 0;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 }

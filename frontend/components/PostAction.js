@@ -51,6 +51,12 @@ export default function PostAction({ post, authState }) {
         <Ionicons name='chatbubble-outline' size={24} color='black' />
         <Text style={styles.actionText}>{post.commentCount}</Text>
       </View>
+
+      {/* 조회 수 */}
+      <View style={styles.actionButton}>
+        <Ionicons name='stats-chart-outline' size={24} color='black' />
+        <Text style={styles.actionText}>{post.viewCount}</Text>
+      </View>
     </View>
   );
 }

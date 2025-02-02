@@ -20,5 +20,6 @@ public class PostResponse {
     private String createdBy;
     private Integer likeCount;
     private Integer commentCount;
+    private Integer viewCount;
     private boolean isLiked;
 }

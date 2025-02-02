@@ -2,7 +2,9 @@ package com.nowtrip.api.controller;
 
 import com.nowtrip.api.request.PostRequest;
 import com.nowtrip.api.response.post.PostResponse;
+import com.nowtrip.api.response.post.PostViewCountService;
 import com.nowtrip.api.service.post.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,10 +19,10 @@ import java.util.List;
 @RequestMapping("/api/posts")
 public class PostController {
     private final PostService postService;
+    private final PostViewCountService postViewCountService;
 
     @PostMapping
     public ResponseEntity<String> createPostByCountry(@RequestBody @Valid PostRequest request) {
-        System.out.println("request = " + request.getImageUrl());
         Long id = postService.createPostByCountry(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
     }
@@ -42,7 +44,8 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> getPost(@PathVariable Long id, HttpServletRequest request) {
+        postViewCountService.increaseViewCount(id, request.getRemoteAddr()); // 사용자 ip
         PostResponse postResponse = postService.getPost(id);
         return ResponseEntity.ok(postResponse);
     }
