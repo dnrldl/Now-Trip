@@ -21,6 +21,9 @@ public class Country {
     @Column(nullable = false, unique = true, length = 3)
     private String iso3Code;
 
+    @Column(nullable = false, unique = true, length = 2)
+    private String iso2Code;
+
     @Column(nullable = false, length = 3)
     private String currencyCode;
 }

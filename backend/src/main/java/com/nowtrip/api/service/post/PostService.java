@@ -74,6 +74,7 @@ public class PostService {
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
+        post.setImageUrl(request.getImageUrl());
 
         // 국가 코드
         if (request.getIso3Code() == null || request.getIso3Code().trim().isEmpty()) {

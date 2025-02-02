@@ -1,34 +1,33 @@
-Country Name,ISO3 Code,Currency Code
-Japan,JPN,JPY
-South Korea,KOR,KRW
-China,CHN,CNY
-Thailand,THA,THB
-Vietnam,VNM,VND
-Philippines,PHL,PHP
-Indonesia,IDN,IDR
-Singapore,SGP,SGD
-Malaysia,MYS,MYR
-Hong Kong,HKG,HKD
-Taiwan,TWN,TWD
-France,FRA,EUR
-Italy,ITA,EUR
-Spain,ESP,EUR
-United Kingdom,GBR,GBP
-Switzerland,CHE,CHF
-Germany,DEU,EUR
-Czechia,CZE,EUR
-Austria,AUT,EUR
-Greece,GRC,EUR
-Turkey,TUR,TRY
-United States,USA,USD
-Canada,CAN,CAD
-Mexico,MEX,MXN
-Brazil,BRA,BRL
-Australia,AUS,AUD
-New Zealand,NZL,NZD
-United Arab Emirates,ARE,AED
-South Africa,ZAF,ZAR
-Egypt,EGY,EGP
-Morocco,MAR,MAD
-Guam,GUM,USD
-Saipan,MNP,USD
+Country Name,ISO3 Code,Currency Code,ISO2 Code
+Japan,JPN,JPY,JP
+South Korea,KOR,KRW,KR
+China,CHN,CNY,CN
+Thailand,THA,THB,TH
+Vietnam,VNM,VND,VN
+Philippines,PHL,PHP,PH
+Indonesia,IDN,IDR,IN
+Singapore,SGP,SGD,SG
+Malaysia,MYS,MYR,MY
+Hong Kong,HKG,HKD,HK
+Taiwan,TWN,TWD,TW
+France,FRA,EUR,FR
+Italy,ITA,EUR,IT
+Spain,ESP,EUR,ES
+United Kingdom,GBR,GBP,UK
+Switzerland,CHE,CHF,CH
+Germany,DEU,EUR,DE
+Czechia,CZE,EUR,CZ
+Austria,AUT,EUR,AT
+Greece,GRC,EUR,GR
+Turkey,TUR,TRY,TR
+United States,USA,USD,US
+Canada,CAN,CAD,CA
+Mexico,MEX,MXN,MX
+Brazil,BRA,BRL,BR
+Australia,AUS,AUD,AU
+New Zealand,NZL,NZD,NZ
+United Arab Emirates,ARE,AED,AE
+South Africa,ZAF,ZAR,ZA
+Egypt,EGY,EGP,EG
+Morocco,MAR,MAD,MA
+Guam,GUM,USD,GU

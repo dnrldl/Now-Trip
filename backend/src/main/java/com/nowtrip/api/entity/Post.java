@@ -25,6 +25,9 @@ public class Post extends Auditable {
     @Column(nullable = false, columnDefinition = "TEXT") // 문자열 제한 x
     private String content;
 
+    @Column
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private Country country;

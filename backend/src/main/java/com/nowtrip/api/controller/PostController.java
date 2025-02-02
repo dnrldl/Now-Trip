@@ -20,7 +20,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<String> createPostByCountry(@RequestBody @Valid PostRequest request) {
-        System.out.println("request = " + request.getIso3Code());
+        System.out.println("request = " + request.getImageUrl());
         Long id = postService.createPostByCountry(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
     }

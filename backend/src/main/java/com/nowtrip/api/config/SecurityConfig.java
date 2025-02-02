@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .exceptionHandling(handle -> handle.authenticationEntryPoint(customAuthenticationEntryPoint))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/auth/login", "/api/auth/refresh-token",
-                                "/api/auth/validate-token",
+                                "/api/auth/validate-token", "/api/s3/**",
                                 "/api/exchange/**", "/api/values/**", "/api/ppp/**",
                                 "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()

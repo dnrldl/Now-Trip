@@ -34,11 +34,13 @@ public class CountryService {
                 String countryName = data[0].trim();
                 String iso3Code = data[1].trim();
                 String currencyCode = data[2].trim();
+                String iso2Code = data[3].trim();
 
                 countries.add(Country.builder()
                                 .iso3Code(iso3Code)
                                 .countryName(countryName)
                                 .currencyCode(currencyCode)
+                                .iso2Code(iso2Code)
                                 .build());
             }
         }
