@@ -35,7 +35,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: '게시글',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name='home' size={size} color={color} />
+            <Ionicons name='clipboard' size={size} color={color} />
           ),
         }}
       />

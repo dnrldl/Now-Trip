@@ -1,10 +1,13 @@
 package com.nowtrip.api.service.exchageRate;
 
 import com.nowtrip.api.entity.ExchangeRate;
+import com.nowtrip.api.entity.Post;
 import com.nowtrip.api.repository.ExchangeRateRepository;
+import com.nowtrip.api.response.exchange.ExchangeListResponse;
 import com.nowtrip.api.response.exchange.ExchangeRateDetailsResponse;
 import com.nowtrip.api.response.exchange.ExchangeResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +26,31 @@ public class ExchangeRateService {
     private final ExchangeRateRepository exchangeRateRepository;
     private final ExchangeRateApiClient exchangeRateApiClient;
 
-    @Scheduled(cron = "0 0 1 * * ?", zone = "Asia/Seoul") // 하루 한 번 오전 1시 실행
+//    @Scheduled(cron = "0 0 1 * * ?", zone = "Asia/Seoul") // 하루 한 번 오전 1시 실행
     public void saveDailyExchangeRates() {
         exchangeRateApiClient.fetchAndStoreExchangeRates();
         System.out.println("환율 데이터를 성공적으로 저장했습니다: " + LocalDateTime.now());
     }
 
-    // 특정 통화의 시간별 환율 조회
+    // 환율의 최신 목록들 조회 (메인 페이지)
+    public Page<ExchangeListResponse> getExchangeRateList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("changeRate").descending());
+
+        Page<Object[]> results = exchangeRateRepository.findTopChangedRates(pageable);
+
+        List<ExchangeListResponse> dtoList = results.stream().map(obj -> new ExchangeListResponse(
+                (String) obj[0], // targetCurrency
+                (String) obj[1], // iso2Code
+                (BigDecimal) obj[2], // rate (todayRate)
+                (BigDecimal) obj[3] != null && ((BigDecimal) obj[3]).compareTo(BigDecimal.ZERO) != 0
+                        ? ((BigDecimal) ((BigDecimal) obj[2]).subtract((BigDecimal) obj[3])).divide((BigDecimal) obj[3], 6, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100))
+                        : BigDecimal.ZERO // rateChangePercentage
+        )).collect(Collectors.toList());
+
+        return new PageImpl<>(dtoList, pageable, results.getTotalElements());
+    }
+
+    // 특정 통화의 시간별 환율 조회 (환율 상세 페이지)
     public ExchangeRateDetailsResponse getExchangeRateHistoryWithChange(String targetCurrency, String filter) {
         // 필터에 따라 구할 환율의 기간 지정
         LocalDate endDate = LocalDate.now();
@@ -126,6 +147,7 @@ public class ExchangeRateService {
 
         LocalDate endDate = LocalDate.now();
         for (int i = 0; i < 730; i++) {
+            // 11
             testRates.add(createExchangeRate("KRW", endDate.minusDays(i), 1400.0, 1500.0));
             testRates.add(createExchangeRate("JPY", endDate.minusDays(i), 120.0, 160.0));
             testRates.add(createExchangeRate("CNY", endDate.minusDays(i), 180.0, 220.0));
@@ -138,24 +160,24 @@ public class ExchangeRateService {
             testRates.add(createExchangeRate("HKD", endDate.minusDays(i), 7.0, 8.0));
             testRates.add(createExchangeRate("TWD", endDate.minusDays(i), 27.0, 30.0));
 
-            // 유럽
+            // 유럽 4
             testRates.add(createExchangeRate("EUR", endDate.minusDays(i), 0.8, 1.2));
             testRates.add(createExchangeRate("GBP", endDate.minusDays(i), 0.7, 0.9));
             testRates.add(createExchangeRate("CHF", endDate.minusDays(i), 0.9, 1.1));
             testRates.add(createExchangeRate("TRY", endDate.minusDays(i), 7.0, 10.0));
 
-            // 북미
+            // 북미 2
             testRates.add(createExchangeRate("CAD", endDate.minusDays(i), 1.2, 1.5));
             testRates.add(createExchangeRate("MXN", endDate.minusDays(i), 19.0, 25.0));
 
-            // 남미
+            // 남미 1
             testRates.add(createExchangeRate("BRL", endDate.minusDays(i), 4.0, 5.5));
 
-            // 오세아니아
+            // 오세아니아 2
             testRates.add(createExchangeRate("AUD", endDate.minusDays(i), 1.3, 1.8));
             testRates.add(createExchangeRate("NZD", endDate.minusDays(i), 1.4, 1.9));
 
-            // 중동 및 아프리카
+            // 중동 및 아프리카 4
             testRates.add(createExchangeRate("AED", endDate.minusDays(i), 3.5, 4.0));
             testRates.add(createExchangeRate("ZAR", endDate.minusDays(i), 14.0, 18.0));
             testRates.add(createExchangeRate("EGP", endDate.minusDays(i), 15.0, 20.0));
@@ -176,4 +198,6 @@ public class ExchangeRateService {
                 .lastUpdated(date)
                 .build();
     }
+
+
 }

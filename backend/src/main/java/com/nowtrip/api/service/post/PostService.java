@@ -189,6 +189,7 @@ public class PostService {
                 .content(content)
                 .commentCount(0)
                 .likeCount(0)
+                .viewCount(0)
                 .build();
     }
 

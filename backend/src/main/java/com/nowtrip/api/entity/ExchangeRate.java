@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@Table(name = "exchange_rate", // 인덱스 사용하여 풀스캔 방지
+@Table(name = "exchange_rates", // 인덱스 사용하여 풀스캔 방지
         indexes = @Index(name = "idx_last_updated", columnList = "lastUpdated"))
 public class ExchangeRate {
     @Id

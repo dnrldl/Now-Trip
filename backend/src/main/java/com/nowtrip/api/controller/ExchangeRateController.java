@@ -1,10 +1,12 @@
 package com.nowtrip.api.controller;
 
+import com.nowtrip.api.response.exchange.ExchangeListResponse;
 import com.nowtrip.api.response.exchange.ExchangeRateDetailsResponse;
 import com.nowtrip.api.response.exchange.ExchangeResponse;
 import com.nowtrip.api.service.exchageRate.ExchangeRateApiClient;
 import com.nowtrip.api.service.exchageRate.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/exchange")
 @RequiredArgsConstructor
-public class ExchangeController {
+public class ExchangeRateController {
     private final ExchangeRateService exchangeRateService;
     private final ExchangeRateApiClient exchangeRateApiClient;
 
@@ -29,6 +31,13 @@ public class ExchangeController {
     public ResponseEntity<List<ExchangeResponse>> getExchangeRates() {
         List<ExchangeResponse> exchangeRates = exchangeRateService.getExchangeRates();
         return ResponseEntity.ok(exchangeRates);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<Page<ExchangeListResponse>> getExchangeRateList(@RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "10") int size) {
+        Page<ExchangeListResponse> responses = exchangeRateService.getExchangeRateList(page, size);
+        return ResponseEntity.ok(responses);
     }
 
     // 가장 최신의 환율 반환
