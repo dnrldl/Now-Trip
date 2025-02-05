@@ -52,6 +52,8 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
         SELECT 
             t.target_currency AS currency,
             c.currency_flag_code AS flagCode,
+            c.korean_name AS koreanName,
+            c.symbol AS symbol,
             t.today_rate AS todayRate,
             y.yesterday_rate AS yesterdayRate,
             CASE 
@@ -63,7 +65,6 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
         JOIN currency c ON t.target_currency = c.code
         ORDER BY changeRate DESC
         """,
-            countQuery = "SELECT COUNT(DISTINCT target_currency) FROM exchange_rate",
             nativeQuery = true)
-    Page<Object[]> findTopChangedRates(Pageable pageable);
+    List<Object[]> findTopChangedRates();
 }

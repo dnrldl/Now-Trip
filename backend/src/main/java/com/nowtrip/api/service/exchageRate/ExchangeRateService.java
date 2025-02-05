@@ -33,21 +33,19 @@ public class ExchangeRateService {
     }
 
     // 환율의 최신 목록들 조회 (메인 페이지)
-    public Page<ExchangeListResponse> getExchangeRateList(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("changeRate").descending());
-        Page<Object[]> results = exchangeRateRepository.findTopChangedRates(pageable);
-
-        List<ExchangeListResponse> dtoList = results.stream()
+    public List<ExchangeListResponse> getExchangeRateList() {
+        List<Object[]> results = exchangeRateRepository.findTopChangedRates();
+        return results.stream()
                 .map(obj -> new ExchangeListResponse(
                 (String) obj[0], // currency
                 (String) obj[1], // flagCode
-                (BigDecimal) obj[2], // rate (todayRate)
-                obj[3] != null && ((BigDecimal) obj[3]).compareTo(BigDecimal.ZERO) != 0
-                        ? ((BigDecimal) ((BigDecimal) obj[2]).subtract((BigDecimal) obj[3])).divide((BigDecimal) obj[3], 6, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100))
+                (String) obj[2], // koreanName
+                (String) obj[3],
+                (BigDecimal) obj[4], // rate (todayRate)
+                obj[5] != null && ((BigDecimal) obj[5]).compareTo(BigDecimal.ZERO) != 0
+                        ? ((BigDecimal) ((BigDecimal) obj[4]).subtract((BigDecimal) obj[5])).divide((BigDecimal) obj[5], 6, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100))
                         : BigDecimal.ZERO // rateChangePercentage
         )).collect(Collectors.toList());
-
-        return new PageImpl<>(dtoList, pageable, results.getTotalElements());
     }
 
     // 특정 통화의 시간별 환율 조회 (환율 상세 페이지)
@@ -98,6 +96,7 @@ public class ExchangeRateService {
     public ExchangeResponse getExchangeRate(String targetCurrency) {
         ExchangeRate exchangeRate = exchangeRateRepository.findTopByTargetCurrencyOrderByLastUpdatedDesc(targetCurrency)
                 .orElseThrow(() -> new IllegalArgumentException("환율 정보를 찾을 수 없습니다"));
+
 
         return ExchangeResponse.builder()
                 .targetCurrency(exchangeRate.getTargetCurrency())

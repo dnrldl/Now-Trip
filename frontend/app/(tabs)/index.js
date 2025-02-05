@@ -10,29 +10,29 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { fetchExchangeRateList } from '../../api/exchangeRateApi';
-import currencySymbols from '../../utils/currencySymbols';
-import { SvgUri } from 'react-native-svg';
 import FlagImage, { clearAllFiles } from '../../components/FlagImage';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen() {
   const [exchangeRates, setExchangeRates] = useState([]);
-  const [page, setPage] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const [isLast, setIsLast] = useState(false);
   const [showUpBtn, setShowUpBtn] = useState(false);
   const flatListRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  useEffect(() => {
+    initExchangeList();
+    setShowUpBtn(false);
+  }, []);
+
   const initExchangeList = async () => {
     setLoading(true);
     setRefreshing(false);
     try {
-      const response = await fetchExchangeRateList(0);
-      setIsLast(response.last);
-      setExchangeRates(response.content);
-      console.log(exchangeRates);
+      const response = await fetchExchangeRateList();
+      setExchangeRates(response);
     } catch (err) {
       setError('데이터를 불러오는 중 문제가 발생했습니다.');
       console.error(err);
@@ -44,25 +44,6 @@ export default function HomeScreen() {
   const handleScroll = (event) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     setShowUpBtn(offsetY > 200);
-  };
-
-  useEffect(() => {
-    initExchangeList();
-    setShowUpBtn(false);
-  }, []);
-
-  const handleLoadMore = async () => {
-    if (isLast) return;
-
-    try {
-      setPage((prevPage) => prevPage + 1);
-      const response = await fetchExchangeRateList(page + 1);
-      setIsLast(response.last);
-      setExchangeRates((prev) => [...prev, ...response.content]);
-    } catch (error) {
-      setError('데이터를 불러오는 중 문제가 발생했습니다.');
-      console.error(error);
-    }
   };
 
   const onRefresh = async () => {
@@ -99,17 +80,20 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={clearAllFiles}>
+      <View style={styles.header}>
+        {/* <TouchableOpacity onPress={clearAllFiles}> */}
         <Text style={styles.title}>환율 정보</Text>
-      </TouchableOpacity>
+        {/* </TouchableOpacity> */}
+        <TouchableOpacity onPress={() => router.push('/search')}>
+          <Ionicons name='search' size={32} color='#666' />
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         ref={flatListRef}
         data={exchangeRates}
         keyExtractor={(item, index) => `${item.targetCurrency}-${index}`}
         renderItem={({ item, index }) => {
-          const currencySymbol =
-            currencySymbols[item.targetCurrency] || item.targetCurrency;
           const currencyCode = item.flagCode.toLowerCase();
 
           return (
@@ -136,9 +120,11 @@ export default function HomeScreen() {
 
                 {/* 통화 정보 */}
                 <View style={styles.infoContainer}>
-                  <Text style={styles.currencyText}>{item.targetCurrency}</Text>
+                  <Text style={styles.currencyText}>
+                    {item.targetCurrency} {item.koreanName}
+                  </Text>
                   <Text style={styles.rateText}>
-                    {currencySymbol} {item.rate.toLocaleString()}
+                    {item.symbol} {item.rate.toLocaleString()}
                   </Text>
                 </View>
 
@@ -160,10 +146,8 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0}
         ListFooterComponent={
-          isLast && <Text style={styles.lastText}>마지막 목록입니다.</Text>
+          <Text style={styles.lastText}>마지막 목록입니다.</Text>
         }
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -191,6 +175,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
+  header: { flexDirection: 'row', justifyContent: 'space-between' },
   title: {
     fontSize: 32,
     fontWeight: 'bold',

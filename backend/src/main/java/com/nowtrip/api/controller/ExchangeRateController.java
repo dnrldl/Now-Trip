@@ -34,9 +34,8 @@ public class ExchangeRateController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<Page<ExchangeListResponse>> getExchangeRateList(@RequestParam(defaultValue = "0") int page,
-                                                                          @RequestParam(defaultValue = "10") int size) {
-        Page<ExchangeListResponse> responses = exchangeRateService.getExchangeRateList(page, size);
+    public ResponseEntity<List<ExchangeListResponse>> getExchangeRateList() {
+        List<ExchangeListResponse> responses = exchangeRateService.getExchangeRateList();
         return ResponseEntity.ok(responses);
     }
 

@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 public class ExchangeListResponse {
     private String targetCurrency;
     private String flagCode;
+    private String koreanName;
+    private String symbol;
     private BigDecimal rate;
     private BigDecimal rateChangePercentage;
 }

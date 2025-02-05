@@ -3,11 +3,9 @@ import handleError from './handleApiError';
 
 const PATH = '/exchange';
 
-export const fetchExchangeRateList = async (page) => {
+export const fetchExchangeRateList = async () => {
   try {
-    const response = await publicAxios.get(PATH + '/list', {
-      params: { page },
-    });
+    const response = await publicAxios.get(PATH + '/list');
     return response.data;
   } catch (error) {
     handleError(error);
