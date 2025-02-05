@@ -37,7 +37,7 @@ const FlagImage = ({ countryCode }) => {
   return (
     <Image
       source={{ uri: localUri }}
-      style={{ width: 40, height: 40 }}
+      style={{ width: '100%', height: '100%' }}
       resizeMode='contain'
     />
   );
@@ -48,7 +48,6 @@ export const clearAllFiles = async () => {
     const files = await FileSystem.readDirectoryAsync(
       FileSystem.documentDirectory
     );
-
     for (const file of files) {
       const filePath = `${FileSystem.documentDirectory}${file}`;
       console.log(`🗑 삭제 중: ${filePath}`);

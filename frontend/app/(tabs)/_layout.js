@@ -28,6 +28,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='home' size={size} color={color} />
           ),
+          unmountOnBlur: false,
         }}
       />
       <Tabs.Screen
@@ -37,6 +38,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='clipboard' size={size} color={color} />
           ),
+          unmountOnBlur: false,
         }}
       />
       <Tabs.Screen
@@ -46,6 +48,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='person' size={size} color={color} />
           ),
+          unmountOnBlur: false,
         }}
       />
     </Tabs>

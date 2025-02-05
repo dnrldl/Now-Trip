@@ -98,7 +98,9 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* <TouchableOpacity onPress={clearAllFiles}> */}
       <Text style={styles.title}>환율 정보</Text>
+      {/* </TouchableOpacity> */}
 
       <FlatList
         ref={flatListRef}
@@ -224,7 +226,7 @@ const styles = StyleSheet.create({
   symbolContainer: {
     width: 50,
     height: 50,
-    borderRadius: 50,
+    borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
