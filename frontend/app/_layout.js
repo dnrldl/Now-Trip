@@ -56,6 +56,14 @@ export default function RootLayout() {
                 title: '환율 그래프',
               }}
             />
+            <Stack.Screen
+              name='search'
+              options={{
+                headerShown: true,
+                headerBackButtonDisplayMode: 'minimal',
+                title: '검색',
+              }}
+            />
           </Stack>
           <StatusBar style='dark' />
         </ExchangeRateProvider>

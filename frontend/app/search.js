@@ -14,6 +14,7 @@ import {
   fetchExchangeRates,
 } from '../api/exchangeRateApi';
 import FlagImage from '../components/FlagImage';
+import { fetchCurrencies } from '../api/currencyApi';
 
 export default function SearchScreen() {
   const [exchangeRates, setExchangeRates] = useState([]);
@@ -24,7 +25,7 @@ export default function SearchScreen() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchExchangeRateList();
+        const response = await fetchCurrencies();
         console.log('API 응답 데이터:', response);
         setExchangeRates(response);
         setFilteredRates(response);
@@ -45,8 +46,8 @@ export default function SearchScreen() {
 
     const filtered = exchangeRates.filter(
       (item) =>
-        item.targetCurrency?.toLowerCase().includes(query.toLowerCase()) ||
-        item.countryName?.toLowerCase().includes(query.toLowerCase())
+        item.code?.toLowerCase().includes(query.toLowerCase()) ||
+        item.koreanName?.toLowerCase().includes(query.toLowerCase())
     );
 
     setFilteredRates(filtered);
@@ -66,29 +67,26 @@ export default function SearchScreen() {
       {filteredRates.length > 0 ? (
         <FlatList
           data={filteredRates}
-          keyExtractor={(item) => item.targetCurrency}
+          keyExtractor={(item) => item.code}
           renderItem={({ item }) => {
-            const currencyCode = item.flagCode.toLowerCase();
-
             return (
               <TouchableOpacity
                 onPress={() =>
                   router.push({
                     pathname: '/exchange-details',
-                    params: { currency: item.targetCurrency },
+                    params: { currency: item.code },
                   })
                 }
               >
-                <FlagImage countryCode={item.flagCode} />
-                <View style={styles.infoContainer}>
-                  <Text style={styles.currencyText}>
-                    {item.targetCurrency} - {item.countryName || '국가명 없음'}
-                  </Text>
-                  <Text style={styles.rateText}>
-                    {`1 USD = ${item.rate?.toLocaleString() || 'N/A'} ${
-                      item.targetCurrency
-                    }`}
-                  </Text>
+                <View style={styles.item}>
+                  <View style={styles.imageContainer}>
+                    <FlagImage countryCode={item.flagCode} />
+                  </View>
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.currencyText}>
+                      {item.code} {item.koreanName || '국가명 없음'}
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
             );
@@ -102,11 +100,11 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5' },
   searchInput: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#666',
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
@@ -115,13 +113,29 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#F8F8F8',
+    padding: 5,
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     marginBottom: 8,
   },
-  infoContainer: { marginLeft: 10 },
-  currencyText: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  rateText: { fontSize: 14, color: '#666' },
+  imageContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  infoContainer: {
+    flex: 1,
+  },
+  currencyText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+  },
   noResult: { textAlign: 'center', fontSize: 16, color: '#999', marginTop: 20 },
 });

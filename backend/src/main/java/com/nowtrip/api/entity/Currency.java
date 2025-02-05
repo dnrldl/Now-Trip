@@ -16,18 +16,18 @@ public class Currency {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 3)
-    private String code;
+    private String code; // JPY
 
     @Column(nullable = false)
-    private String name;
+    private String name; // Japanese Yen
 
     @Column(nullable = false)
-    private String symbol;
+    private String symbol; // ¥
 
     @Column(nullable = false)
-    private String koreanName;
+    private String koreanName; // 일본 엔
 
     @Column(nullable = false, length = 2)
-    private String currencyFlagCode;
+    private String currencyFlagCode; // jp
 
 }

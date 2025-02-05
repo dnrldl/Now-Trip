@@ -110,12 +110,8 @@ export default function HomeScreen() {
                 <Text style={styles.rank}>{index + 1}</Text>
 
                 {/* 통화 기호 */}
-                <View style={styles.symbolContainer}>
-                  {item.flagCode ? (
-                    <FlagImage countryCode={currencyCode} />
-                  ) : (
-                    <Text style={styles.currencySymbol}>🏳️</Text>
-                  )}
+                <View style={styles.imageContainer}>
+                  <FlagImage countryCode={currencyCode} />
                 </View>
 
                 {/* 통화 정보 */}
@@ -198,7 +194,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 10,
     marginBottom: 8,
-    elevation: 2,
   },
   rank: {
     fontSize: 18,
@@ -209,7 +204,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#007BFF',
   },
-  symbolContainer: {
+  imageContainer: {
     width: 50,
     height: 50,
     borderRadius: 10,
@@ -218,11 +213,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
-  },
-  currencySymbol: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
   },
   infoContainer: {
     flex: 1,
