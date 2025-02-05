@@ -32,6 +32,7 @@ export default function HomeScreen() {
       const response = await fetchExchangeRateList(0);
       setIsLast(response.last);
       setExchangeRates(response.content);
+      console.log(exchangeRates);
     } catch (err) {
       setError('데이터를 불러오는 중 문제가 발생했습니다.');
       console.error(err);
@@ -98,9 +99,9 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* <TouchableOpacity onPress={clearAllFiles}> */}
-      <Text style={styles.title}>환율 정보</Text>
-      {/* </TouchableOpacity> */}
+      <TouchableOpacity onPress={clearAllFiles}>
+        <Text style={styles.title}>환율 정보</Text>
+      </TouchableOpacity>
 
       <FlatList
         ref={flatListRef}
@@ -109,7 +110,7 @@ export default function HomeScreen() {
         renderItem={({ item, index }) => {
           const currencySymbol =
             currencySymbols[item.targetCurrency] || item.targetCurrency;
-          const currencyCode = item.iso2Code.toLowerCase();
+          const currencyCode = item.flagCode.toLowerCase();
 
           return (
             <TouchableOpacity
@@ -126,7 +127,7 @@ export default function HomeScreen() {
 
                 {/* 통화 기호 */}
                 <View style={styles.symbolContainer}>
-                  {item.iso2Code ? (
+                  {item.flagCode ? (
                     <FlagImage countryCode={currencyCode} />
                   ) : (
                     <Text style={styles.currencySymbol}>🏳️</Text>

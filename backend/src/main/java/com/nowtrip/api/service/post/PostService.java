@@ -132,7 +132,7 @@ public class PostService {
         List<Long> finalLikedPostIds = likedPostIds;
         return posts.map(post -> {
             String countryName = Optional.ofNullable(post.getCountry())
-                    .map(Country::getCountryName)
+                    .map(Country::getName)
                     .orElse(UNKNOWN_COUNTRY);
 
             boolean isLiked = finalLikedPostIds.contains(post.getId());
@@ -155,7 +155,7 @@ public class PostService {
 
     private PostResponse convertToPostResponse(Post post) {
         String countryName = Optional.ofNullable(post.getCountry())
-                .map(Country::getCountryName)
+                .map(Country::getName)
                 .orElse(UNKNOWN_COUNTRY);
         boolean isLiked = false;
 

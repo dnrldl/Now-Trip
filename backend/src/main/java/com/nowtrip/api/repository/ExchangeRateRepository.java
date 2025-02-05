@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,25 +48,20 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
             SELECT e.target_currency, e.exchange_rate AS yesterday_rate, e.last_updated
             FROM exchange_rate e
             WHERE e.last_updated = (SELECT MAX(last_updated) FROM exchange_rate WHERE last_updated < (SELECT MAX(last_updated) FROM exchange_rate))
-        ),
-        representative_countries AS (
-            SELECT c.currency_code, c.iso2code
-            FROM countries c
-            WHERE c.id = (
-                SELECT MIN(c2.id) 
-                FROM countries c2 
-                WHERE c2.currency_code = c.currency_code
-            )
         )
         SELECT 
             t.target_currency AS currency,
-            rc.iso2code AS iso2Code,
+            c.currency_flag_code AS flagCode,
             t.today_rate AS todayRate,
             y.yesterday_rate AS yesterdayRate,
-            ((t.today_rate - y.yesterday_rate) / y.yesterday_rate) * 100 AS changeRate
+            CASE 
+                WHEN y.yesterday_rate = 0 THEN 0 
+                ELSE ((t.today_rate - y.yesterday_rate) / y.yesterday_rate) * 100 
+            END AS changeRate
         FROM today t
         JOIN yesterday y ON t.target_currency = y.target_currency
-        JOIN representative_countries rc ON t.target_currency = rc.currency_code
+        JOIN currency c ON t.target_currency = c.code
+        ORDER BY changeRate DESC
         """,
             countQuery = "SELECT COUNT(DISTINCT target_currency) FROM exchange_rate",
             nativeQuery = true)

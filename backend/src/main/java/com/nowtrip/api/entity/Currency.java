@@ -16,15 +16,18 @@ public class Currency {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 3)
-    private String currencyCode;
+    private String code;
 
     @Column(nullable = false)
-    private String currencyName;
+    private String name;
 
     @Column(nullable = false)
     private String symbol;
 
     @Column(nullable = false)
     private String koreanName;
+
+    @Column(nullable = false, length = 2)
+    private String currencyFlagCode;
 
 }

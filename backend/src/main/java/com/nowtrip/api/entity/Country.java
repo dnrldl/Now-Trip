@@ -16,7 +16,7 @@ public class Country {
     private Long id;
 
     @Column(nullable = false)
-    private String countryName;
+    private String name;
 
     @Column(nullable = false, unique = true, length = 3)
     private String iso3Code;

@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Builder
 public class ExchangeListResponse {
     private String targetCurrency;
-    private String iso2Code;
+    private String flagCode;
     private BigDecimal rate;
     private BigDecimal rateChangePercentage;
 }

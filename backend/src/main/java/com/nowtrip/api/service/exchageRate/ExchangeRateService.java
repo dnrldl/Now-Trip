@@ -35,14 +35,14 @@ public class ExchangeRateService {
     // 환율의 최신 목록들 조회 (메인 페이지)
     public Page<ExchangeListResponse> getExchangeRateList(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("changeRate").descending());
-
         Page<Object[]> results = exchangeRateRepository.findTopChangedRates(pageable);
 
-        List<ExchangeListResponse> dtoList = results.stream().map(obj -> new ExchangeListResponse(
-                (String) obj[0], // targetCurrency
-                (String) obj[1], // iso2Code
+        List<ExchangeListResponse> dtoList = results.stream()
+                .map(obj -> new ExchangeListResponse(
+                (String) obj[0], // currency
+                (String) obj[1], // flagCode
                 (BigDecimal) obj[2], // rate (todayRate)
-                (BigDecimal) obj[3] != null && ((BigDecimal) obj[3]).compareTo(BigDecimal.ZERO) != 0
+                obj[3] != null && ((BigDecimal) obj[3]).compareTo(BigDecimal.ZERO) != 0
                         ? ((BigDecimal) ((BigDecimal) obj[2]).subtract((BigDecimal) obj[3])).divide((BigDecimal) obj[3], 6, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100))
                         : BigDecimal.ZERO // rateChangePercentage
         )).collect(Collectors.toList());
@@ -147,7 +147,7 @@ public class ExchangeRateService {
 
         LocalDate endDate = LocalDate.now();
         for (int i = 0; i < 730; i++) {
-            // 11
+            // 아시아 11
             testRates.add(createExchangeRate("KRW", endDate.minusDays(i), 1400.0, 1500.0));
             testRates.add(createExchangeRate("JPY", endDate.minusDays(i), 120.0, 160.0));
             testRates.add(createExchangeRate("CNY", endDate.minusDays(i), 180.0, 220.0));
