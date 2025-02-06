@@ -5,6 +5,8 @@ import lombok.*;
 
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,5 +23,5 @@ public class PostRequest {
     @Size(max = 3, message = "국가 코드 3자리나 빈 문자열이 필요해요.")
     private String iso3Code;
 
-    private String imageUrl;
+    private List<String> imageUrls;
 }

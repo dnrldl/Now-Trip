@@ -3,10 +3,8 @@ package com.nowtrip.api.service.post;
 import com.nowtrip.api.entity.Country;
 import com.nowtrip.api.entity.Like;
 import com.nowtrip.api.entity.Post;
-import com.nowtrip.api.repository.CommentRepository;
-import com.nowtrip.api.repository.CountryRepository;
-import com.nowtrip.api.repository.LikeRepository;
-import com.nowtrip.api.repository.PostRepository;
+import com.nowtrip.api.entity.PostImage;
+import com.nowtrip.api.repository.*;
 import com.nowtrip.api.request.PostRequest;
 import com.nowtrip.api.response.post.PostResponse;
 import com.nowtrip.api.service.auth.AuthenticationHelper;
@@ -29,6 +27,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final CountryRepository countryRepository;
     private final LikeRepository likeRepository;
+    private final PostImageRepository postImageRepository;
     private final AuthenticationHelper authenticationHelper;
     private static final String UNKNOWN_COUNTRY = "Unknown Country";
 
@@ -69,14 +68,14 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // 등록
-    public Long createPostByCountry(PostRequest request) {
-        Post post = new Post();
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
-        post.setImageUrl(request.getImageUrl());
+    // 게시글 등록
+    public Long createPost(PostRequest request) {
+        Post post = Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .build();
 
-        // 국가 코드
+        // 국가 코드 저장
         if (request.getIso3Code() == null || request.getIso3Code().trim().isEmpty()) {
             post.setCountry(null);
         } else {
@@ -85,10 +84,19 @@ public class PostService {
             post.setCountry(country);
         }
 
+        // 이미지 저장
+        for (String imageUrl : request.getImageUrls()) {
+            PostImage postImage = PostImage.builder()
+                    .imageUrl(imageUrl)
+                    .post(post)
+                    .build();
+            postImageRepository.save(postImage);
+        }
+
         return postRepository.save(post).getId();
     }
 
-    // 변경
+    // 게시글 변경
     public void updatePost(Long id, PostRequest request) {
         Post savedPost = postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
@@ -141,6 +149,7 @@ public class PostService {
                     post.getId(),
                     post.getTitle(),
                     post.getContent(),
+                    post.getImages().stream().map(PostImage::getImageUrl).collect(Collectors.toList()),
                     countryName,
                     post.getCreatedAt(),
                     post.getCreatedBy(),
@@ -169,6 +178,7 @@ public class PostService {
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
+                post.getImages().stream().map(PostImage::getImageUrl).collect(Collectors.toList()),
                 countryName,
                 post.getCreatedAt(),
                 post.getCreatedBy(),
@@ -184,13 +194,30 @@ public class PostService {
      * 테스트 코드
      */
     public Post createTestPosts(String title, String content) {
-        return Post.builder()
+        Post post = Post.builder()
                 .title(title)
                 .content(content)
                 .commentCount(0)
                 .likeCount(0)
                 .viewCount(0)
                 .build();
+        post.setCreatedBy("test@test.com");
+
+        return post;
+    }
+
+    public List<PostImage> createTestPostImages(Post post) {
+        List<PostImage> images = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            PostImage postImage = PostImage.builder()
+                    .post(post)
+                    .imageUrl("https://picsum.photos/400/500?random=" + i)
+                    .build();
+            images.add(postImage);
+        }
+
+        return images;
     }
 
     public void generateTestData() {
@@ -198,13 +225,18 @@ public class PostService {
             return;
 
         List<Post> posts = new ArrayList<>();
+        List<PostImage> postImages = new ArrayList<>();
 
         for (int i = 0; i < 50; i++) {
-            posts.add(createTestPosts("테스트" + (i+1), "테스트 내용"));
+            Post post = createTestPosts("테스트" + (i+1), "테스트 내용");
+            posts.add(post);
+
+            postImages.addAll(createTestPostImages(post));
         }
 
         // 데이터 저장
         postRepository.saveAll(posts);
+        postImageRepository.saveAll(postImages);
         System.out.println("대량의 테스트 데이터가 성공적으로 저장되었습니다");
     }
 

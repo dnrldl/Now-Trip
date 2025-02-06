@@ -22,8 +22,8 @@ public class PostController {
     private final PostViewCountService postViewCountService;
 
     @PostMapping
-    public ResponseEntity<String> createPostByCountry(@RequestBody @Valid PostRequest request) {
-        Long id = postService.createPostByCountry(request);
+    public ResponseEntity<String> createPost(@RequestBody @Valid PostRequest request) {
+        Long id = postService.createPost(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다. id: " + id);
     }
 

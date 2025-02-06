@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,8 +16,8 @@ public class S3Controller {
     private final S3Service s3Service;
 
     @PostMapping("/presigned-url")
-    public ResponseEntity<Map<String, String>> getPresignedUrl(@RequestBody Map<String, String> request) {
-        Map<String, String> response = s3Service.generatePresignedUrl(request.get("fileName"));
+    public ResponseEntity<List<Map<String, String>>> getPresignedUrl(@RequestBody List<String> request) {
+        List<Map<String, String>> response = s3Service.generatePresignedUrl(request);
         return ResponseEntity.ok(response);
     }
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,6 +16,7 @@ public class PostResponse {
     private Long id;
     private String title;
     private String content;
+    private List<String> imgUrl;
     private String country;
     private LocalDateTime createdAt;
     private String createdBy;

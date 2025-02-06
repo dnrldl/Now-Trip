@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,109 +7,117 @@ import {
   StyleSheet,
   Alert,
   Image,
+  Dimensions,
+  FlatList,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { addPost } from '../../../api/postApi';
 import { useRouter } from 'expo-router';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { getPresignedUrl } from '../../../api/s3Api';
+import { getPresignedUrls } from '../../../api/s3Api';
 import axios from 'axios';
-import { Buffer } from 'buffer';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function AddPostScreen() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [iso3Code, setIso3Code] = useState(null); // 선택한 국가
-  const [image, setImage] = useState(null); // 선택한 이미지
-  const [imageType, setImageType] = useState('');
-  // const [base64, setBase64] = useState('');
+  const [iso3Code, setIso3Code] = useState(null);
+  const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [open, setOpen] = useState(false); // 드롭다운 열기/닫기 상태
+  const [open, setOpen] = useState(false);
   const router = useRouter();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 };
 
-  const countries = [
-    {
-      countryName: 'Japan',
-      iso3Code: 'JPN',
-    },
-    {
-      countryName: 'Korea',
-      iso3Code: 'KOR',
-    },
-  ];
-
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images', 'videos'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-      // base64: true,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      setImageType(result.assets[0].mimeType);
-      // setBase64(result.assets[0].base64);
+  const onViewableItemsChanged = ({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index || 0);
     }
   };
 
+  const viewabilityConfigCallbackPairs = useRef([
+    { viewabilityConfig, onViewableItemsChanged },
+  ]);
+
+  const countries = [
+    { countryName: 'Japan', iso3Code: 'JPN' },
+    { countryName: 'Korea', iso3Code: 'KOR' },
+  ];
+
+  // 📌 이미지 선택 (여러 개 선택 가능)
+  const pickImage = async () => {
+    let results = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      aspect: [4, 5],
+      quality: 1,
+    });
+
+    if (!results.canceled) {
+      const selectedImages = results.assets.map((asset) => ({
+        uri: asset.uri,
+        type: asset.mimeType,
+        fileName: asset.uri.split('/').pop(),
+      }));
+      setImages([...images, ...selectedImages]);
+    }
+  };
+
+  // 📌 이미지 삭제 기능 (길게 누르면 삭제됨)
+  const removeImage = (index) => {
+    const newImages = images.filter((_, i) => i !== index);
+    setImages(newImages);
+  };
+
+  // 📌 게시글 등록
   const handleSubmit = async () => {
     if (!title || !content) {
       Alert.alert('게시글 오류', '제목과 내용을 입력해주세요.');
       return;
     }
 
-    let uploadedImageUrl = null;
+    if (images.length === 0) {
+      Alert.alert('이미지 오류', '적어도 한 개의 이미지를 업로드해주세요.');
+      return;
+    }
 
+    setUploading(true);
     try {
-      if (image) {
-        setUploading(true);
+      const fileNames = images.map((img) => img.fileName);
+      const presignedUrls = await getPresignedUrls(fileNames);
 
-        const fileName = image.split('/').pop(); // test.jpg
-        const { presignedUrl, fileUrl } = await getPresignedUrl(fileName);
+      const uploadedImageUrls = [];
+      for (const image of images) {
+        const presignedUrl = presignedUrls[image.fileName];
+        if (!presignedUrl) {
+          console.error('Presigned URL을 찾을 수 없습니다.');
+          return;
+        }
 
-        const a = await fetch(image);
-        const blob = await a.blob();
+        const file = await fetch(image.uri);
+        const blob = await file.blob();
         const arrayBuffer = await new Response(blob).arrayBuffer();
-        console.log(blob);
-
-        // const buffer = Buffer.from(base64, 'base64');
 
         await axios.put(presignedUrl, arrayBuffer, {
-          headers: {
-            'Content-Type': imageType,
-          },
+          headers: { 'Content-Type': image.type },
         });
-        uploadedImageUrl = fileUrl;
-        console.log(fileUrl);
+
+        uploadedImageUrls.push(presignedUrls.fileUrls[image.fileName]);
       }
 
-      // 게시글 추가
       const response = await addPost({
         title,
         content,
         iso3Code,
-        imageUrl: uploadedImageUrl,
+        imageUrls: uploadedImageUrls,
       });
 
-      console.log('게시글 작성 결과:', response);
       Alert.alert('게시글 등록', '게시글이 등록되었습니다.');
       router.dismiss();
     } catch (error) {
       console.warn('에러 발생:', error);
-      if (error.details.title != null) {
-        Alert.alert('제목 길이 오류', '제목은 최대 50자까지 입력 가능합니다!');
-        return;
-      }
-
-      if (error.status === 401 || error.error == 'Unauthorized') {
-        Alert.alert('세션 만료', '로그인이 필요합니다.');
-        router.back();
-      } else {
-        Alert.alert('에러 발생', '게시글 작성 중 문제가 발생했습니다.');
-      }
+      Alert.alert('에러 발생', '게시글 작성 중 문제가 발생했습니다.');
     } finally {
       setUploading(false);
     }
@@ -122,7 +130,7 @@ export default function AddPostScreen() {
         style={styles.input}
         placeholder='제목을 입력하세요'
         value={title}
-        onChangeText={(text) => setTitle(text)}
+        onChangeText={setTitle}
         autoCapitalize='none'
       />
       <DropDownPicker
@@ -142,7 +150,7 @@ export default function AddPostScreen() {
         style={[styles.input, styles.textArea]}
         placeholder='내용을 입력하세요'
         value={content}
-        onChangeText={(text) => setContent(text)}
+        onChangeText={setContent}
         multiline
         autoCapitalize='none'
       />
@@ -152,8 +160,49 @@ export default function AddPostScreen() {
         <Text style={styles.imageButtonText}>이미지 선택</Text>
       </TouchableOpacity>
 
-      {/* 이미지 미리보기 */}
-      {image && <Image source={{ uri: image }} style={styles.preview} />}
+      {/* 이미지 미리보기 슬라이더 */}
+      {images.length > 0 && (
+        <View style={styles.imagePreviewContainer}>
+          <FlatList
+            data={images}
+            horizontal
+            pagingEnabled
+            decelerationRate='fast'
+            snapToAlignment='center'
+            snapToInterval={SCREEN_WIDTH - 40}
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity onLongPress={() => removeImage(index)}>
+                <Image
+                  source={{ uri: item.uri }}
+                  style={styles.postImage}
+                  resizeMode='cover'
+                />
+              </TouchableOpacity>
+            )}
+            viewabilityConfigCallbackPairs={
+              viewabilityConfigCallbackPairs.current
+            }
+          />
+
+          {/* 슬라이드 인디케이터 */}
+          <View style={styles.indicatorContainer}>
+            {images.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.indicator,
+                  {
+                    backgroundColor:
+                      index === currentIndex ? '#007BFF' : '#ccc',
+                  },
+                ]}
+              />
+            ))}
+          </View>
+        </View>
+      )}
 
       {/* 게시글 등록 버튼 */}
       <TouchableOpacity
@@ -170,49 +219,41 @@ export default function AddPostScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
+  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
-    marginBottom: 15,
+    marginBottom: 5,
   },
-  dropdown: {
-    marginBottom: 10,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
+  dropdown: { marginBottom: 5 },
+  textArea: { height: 100, textAlignVertical: 'top' },
   imageButton: {
     backgroundColor: '#ccc',
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   imageButtonText: { color: '#000', fontSize: 16, fontWeight: 'bold' },
-  preview: { width: '100%', height: 200, borderRadius: 8, marginVertical: 10 },
+  imagePreviewContainer: { alignItems: 'center' },
+  postImage: {
+    width: SCREEN_WIDTH - 40,
+    height: 300,
+    borderRadius: 8,
+    margin: 5,
+  },
+  indicatorContainer: { flexDirection: 'row' },
+  indicator: { width: 8, height: 8, borderRadius: 4, marginHorizontal: 3 },
   button: {
     backgroundColor: '#007BFF',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
+    marginTop: 5,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
 });

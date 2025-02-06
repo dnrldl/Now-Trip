@@ -8,48 +8,71 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  Image,
+  Dimensions,
 } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { fetchPrivatePosts, fetchPublicPosts } from '../../../api/postApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import DateInfo from '../../../components/DateInfo';
 import PostAction from '../../../components/PostAction';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
 export default function PostsScreen() {
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(0); // 불러올 페이지 번호
-  const [refreshing, setRefreshing] = useState(false); // 새로고침
+  const [page, setPage] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isLast, setIsLast] = useState(false); // 마지막 페이지인지 판별
-  const [showUpBtn, setShowUpBtn] = useState(false); // 맨 위로 버튼
+  const [isLast, setIsLast] = useState(false);
   const flatListRef = useRef(null);
   const { authState, loadTokens } = useAuth();
   const router = useRouter();
-  let fetchPosts;
 
-  if (authState.isAuthenticated) {
-    fetchPosts = fetchPrivatePosts;
-  } else {
-    fetchPosts = fetchPublicPosts;
-  }
+  let fetchPosts = authState.isAuthenticated
+    ? fetchPrivatePosts
+    : fetchPublicPosts;
+
+  useEffect(() => {
+    loadTokens();
+    initPosts();
+  }, []);
 
   const initPosts = async () => {
     setLoading(true);
     setRefreshing(false);
     try {
       const data = await fetchPosts(0);
-      const postData = data.content;
-
       setIsLast(data.last);
-      setPosts(postData);
-
-      console.log('게시글 로드 완료');
+      setPosts(data.content);
     } catch (err) {
       setError('게시글을 불러오는 중 문제가 발생했습니다.');
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoadMore = async () => {
+    loadTokens();
+    if (isLast) return;
+    try {
+      setPage((prevPage) => prevPage + 1);
+      const data = await fetchPosts(page + 1);
+      if (page == data.page.totalPages - 1) setIsLast(true);
+      setPosts([...posts, ...data.content]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await initPosts();
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -65,53 +88,6 @@ export default function PostsScreen() {
     }
 
     router.push('/posts/addPost');
-  };
-
-  const handleScroll = (event) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    setShowUpBtn(offsetY > 200);
-  };
-
-  useEffect(() => {
-    loadTokens();
-    setShowUpBtn(false);
-    initPosts();
-  }, []);
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     setShowUpBtn(false);
-  //     initPosts();
-  //   }, [])
-  // );
-
-  const handleLoadMore = async () => {
-    loadTokens();
-    if (isLast) return;
-    try {
-      setPage((prevPage) => prevPage + 1);
-      const data = await fetchPosts(page + 1);
-      const postData = data.content;
-      const pageData = data.page;
-
-      if (page == pageData.totalPages - 1) setIsLast(true);
-
-      setPosts([...posts, ...postData]);
-    } catch (err) {
-      setError('게시글을 불러오는 중 문제가 발생했습니다.');
-      console.error(err);
-    }
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await initPosts();
-    } catch (err) {
-      setError('게시글을 새로고침하는 중 문제가 발생했습니다.');
-    } finally {
-      setRefreshing(false);
-    }
   };
 
   if (loading) {
@@ -144,106 +120,113 @@ export default function PostsScreen() {
         ref={flatListRef}
         data={posts}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.postContainer}
-            onPress={() =>
-              router.push({
-                pathname: '/posts/details',
-                params: { postId: item.id.toString() },
-              })
-            }
-          >
-            <Text style={styles.postTitle}>{item.title}</Text>
-            <Text>{item.createdBy}</Text>
-            <Text style={styles.postInfo}>
-              주제:{' '}
-              {item.country == 'Unknown Country' ? '자유 게시판' : item.country}
-            </Text>
-            <Text style={styles.postInfo}>
-              <DateInfo createdAt={item.createdAt} />
-            </Text>
-
-            {/* 좋아요, 댓글 수 */}
-            <PostAction post={item} authState={authState} />
-          </TouchableOpacity>
-        )}
-        style={styles.list}
+        renderItem={({ item }) => <PostItem item={item} router={router} />}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onEndReached={handleLoadMore}
+        onEndReached={() => !isLast && handleLoadMore()}
         onEndReachedThreshold={1}
-        ListFooterComponent={
-          isLast && <Text style={styles.lastText}>마지막 게시글입니다.</Text>
-        }
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
       />
-      {showUpBtn && (
-        <TouchableOpacity
-          style={styles.upBtn}
-          onPress={() =>
-            flatListRef.current.scrollToOffset({
-              animated: true,
-              offset: 0,
-            })
-          }
-        >
-          <Text style={styles.upBtnText}>▲ 맨 위로</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
 
+const PostItem = ({ item, router }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 };
+
+  const onViewableItemsChanged = ({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index || 0);
+    }
+  };
+
+  const viewabilityConfigCallbackPairs = useRef([
+    { viewabilityConfig, onViewableItemsChanged },
+  ]);
+
+  return (
+    <View
+      style={styles.postContainer}
+      onPress={() =>
+        router.push({
+          pathname: '/posts/details',
+          params: { postId: item.id.toString() },
+        })
+      }
+    >
+      {/* 작성자 정보 */}
+      <View style={styles.postHeader}>
+        <Text style={styles.username}>{item.createdBy}</Text>
+      </View>
+
+      {/* 게시물 이미지 슬라이더 */}
+      <View style={styles.imageSliderContainer}>
+        <FlatList
+          data={item.imgUrl}
+          horizontal
+          pagingEnabled
+          decelerationRate='fast'
+          snapToAlignment='center'
+          snapToInterval={SCREEN_WIDTH}
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(image, index) => `${item.id}-image-${index}`}
+          renderItem={({ item: imageUri }) => (
+            <Image
+              source={{ uri: imageUri }}
+              style={styles.postImage}
+              resizeMode='cover'
+            />
+          )}
+          viewabilityConfigCallbackPairs={
+            viewabilityConfigCallbackPairs.current
+          }
+        />
+
+        {/* 슬라이드 인디케이터 */}
+        <View style={styles.indicatorContainer}>
+          {item.imgUrl.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.indicator,
+                {
+                  backgroundColor: index === currentIndex ? '#007BFF' : '#ccc',
+                },
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* 좋아요, 댓글 정보 */}
+      <View style={styles.postFooter}>
+        <PostAction post={item} />
+        <Text style={styles.postContent}>{item.content}</Text>
+        <Text style={styles.postDate}>
+          <DateInfo createdAt={item.createdAt} />
+        </Text>
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'left',
-  },
-  postTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'left',
-  },
-  list: {
-    marginBottom: 20,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-  },
-  postContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  postInfo: {
-    fontSize: 14,
-    color: '#555',
   },
   addButton: {
     backgroundColor: '#007BFF',
@@ -256,23 +239,61 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-
-  lastText: {
-    textAlign: 'center',
-    color: '#555',
+  postContainer: {
+    marginBottom: 5,
+    backgroundColor: '#fff',
   },
-  upBtn: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#007BFF',
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 10,
-    borderRadius: 50,
-    elevation: 5,
   },
-  upBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
+  username: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  imageSliderContainer: {
+    position: 'relative',
+  },
+  postImage: {
+    width: SCREEN_WIDTH,
+    height: 400,
+    backgroundColor: '#f0f0f0',
+  },
+  indicatorContainer: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  postFooter: {
+    padding: 10,
+  },
+  postContent: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 10,
+  },
+  postDate: {
+    fontSize: 12,
+    color: '#aaa',
+    marginTop: 3,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   },
 });

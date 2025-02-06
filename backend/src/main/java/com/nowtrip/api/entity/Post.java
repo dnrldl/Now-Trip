@@ -25,8 +25,8 @@ public class Post extends Auditable {
     @Column(nullable = false, columnDefinition = "TEXT") // 문자열 제한 x
     private String content;
 
-    @Column
-    private String imageUrl;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PostImage> images = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")

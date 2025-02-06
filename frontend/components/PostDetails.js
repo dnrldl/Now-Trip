@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { addComment, fetchComments, fetchPost } from '../api/postApi';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import DateInfo from './DateInfo';
 import CommentList from './CommentList';
 import CommentInput from './CommentInput';
@@ -12,15 +12,18 @@ export default function PostDetails() {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const post = await fetchPost(postId);
-      setPost(post);
+      const postRes = await fetchPost(postId);
+      setPost(postRes);
 
-      const comments = await fetchComments(postId);
-      setComments(comments);
+      console.log(postRes);
+
+      const commentsRes = await fetchComments(postId);
+      setComments(commentsRes);
       console.log('게시글 상세, 댓글 로드 완료');
     } catch (err) {
       console.warn(err);
@@ -66,7 +69,24 @@ export default function PostDetails() {
           <Text style={styles.meta}>
             {post.createdBy} • <DateInfo createdAt={post.createdAt} />
           </Text>
-          <Text style={styles.content}>{post.content}</Text>
+
+          <View style={styles.imageContainer}>
+            {imageLoading && (
+              <ActivityIndicator
+                size='large'
+                color='#000'
+                style={styles.imageLoader}
+              />
+            )}
+            <Image
+              source={{ uri: post.imgUrl }}
+              style={styles.image}
+              resizeMode='center'
+              onLoadStart={() => setImageLoading(true)}
+              onLoadEnd={() => setImageLoading(false)}
+            />
+            <Text style={styles.content}>{post.content}</Text>
+          </View>
         </View>
       )}
 
@@ -111,5 +131,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     marginTop: 10,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 250, // 이미지 높이 지정
+    justifyContent: 'center',
+    // alignItems: 'center',
+    backgroundColor: '#f0f0f0', // 로딩 중일 때 기본 배경색 추가
+  },
+  imageLoader: {
+    position: 'absolute', // 스피너를 이미지 중앙에 배치
+    zIndex: 1,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
   },
 });
