@@ -40,6 +40,7 @@ export default function PostsScreen() {
   }, []);
 
   const initPosts = async () => {
+    setError(null);
     setLoading(true);
     setRefreshing(false);
     try {
@@ -101,6 +102,9 @@ export default function PostsScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity onPress={initPosts} style={styles.refreshButton}>
+          <Text>새로 고침</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -244,5 +248,18 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 8,
     marginTop: 10,
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  refreshButton: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
   },
 });
