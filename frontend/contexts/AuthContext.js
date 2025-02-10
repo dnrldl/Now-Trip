@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: true,
       });
 
-      console.log('앱 실행시 토큰 로드 완료');
+      console.log('토큰 로드 완료');
       console.log('accessToken:', accessToken);
       console.log('refreshToken:', refreshToken);
     } else {

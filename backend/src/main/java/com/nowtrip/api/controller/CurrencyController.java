@@ -1,5 +1,7 @@
 package com.nowtrip.api.controller;
 
+import com.nowtrip.api.entity.Currency;
+import com.nowtrip.api.repository.CurrencyRepository;
 import com.nowtrip.api.response.currency.CurrencyResponse;
 import com.nowtrip.api.service.currency.CurrencyService;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +17,12 @@ import java.util.List;
 @RequestMapping("/api/currency")
 public class CurrencyController {
     private final CurrencyService currencyService;
+    private final CurrencyRepository currencyRepository;
 
     @GetMapping
-    public ResponseEntity<List<CurrencyResponse>> getCurrencies() {
+    public ResponseEntity<List<Currency>> getCurrencies() {
         List<CurrencyResponse> currencies = currencyService.getCurrencies();
-        return ResponseEntity.ok(currencies);
+        List<Currency> all = currencyRepository.findAll();
+        return ResponseEntity.ok(all);
     }
 }

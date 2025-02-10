@@ -33,6 +33,7 @@ export default function HomeScreen() {
     try {
       const response = await fetchExchangeRateList();
       setExchangeRates(response);
+      console.log(response);
     } catch (err) {
       setError('데이터를 불러오는 중 문제가 발생했습니다.');
       console.error(err);
@@ -81,9 +82,9 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        {/* <TouchableOpacity onPress={clearAllFiles}> */}
-        <Text style={styles.title}>환율 정보</Text>
-        {/* </TouchableOpacity> */}
+        <TouchableOpacity onPress={clearAllFiles}>
+          <Text style={styles.title}>환율 정보</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/search')}>
           <Ionicons name='search' size={32} color='#666' />
         </TouchableOpacity>
@@ -109,7 +110,7 @@ export default function HomeScreen() {
                 {/* 순위 표시 */}
                 <Text style={styles.rank}>{index + 1}</Text>
 
-                {/* 통화 기호 */}
+                {/* 나라 이미지 */}
                 <View style={styles.imageContainer}>
                   <FlagImage countryCode={currencyCode} />
                 </View>
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: 50,
     height: 50,
-    borderRadius: 10,
+    borderRadius: 50,
     overflow: 'hidden',
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',

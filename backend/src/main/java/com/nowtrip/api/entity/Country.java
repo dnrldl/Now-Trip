@@ -25,9 +25,9 @@ public class Country {
     private String iso2Code;
 
     @Column(nullable = false)
-    private String korean_name;
+    private String koreanName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency_id", nullable = false)
     private Currency currency;
 }

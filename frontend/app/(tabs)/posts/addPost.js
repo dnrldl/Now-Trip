@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { getPresignedUrls } from '../../../api/s3Api';
 import axios from 'axios';
+import { DataContext } from '../../../contexts/DataContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -26,9 +27,14 @@ export default function AddPostScreen() {
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
+  const { countries } = useContext(DataContext);
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 };
+
+  const sortedCountries = countries.sort((a, b) =>
+    a.koreanName.localeCompare(b.koreanName)
+  );
 
   const onViewableItemsChanged = ({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -40,10 +46,10 @@ export default function AddPostScreen() {
     { viewabilityConfig, onViewableItemsChanged },
   ]);
 
-  const countries = [
-    { countryName: 'Japan', iso3Code: 'JPN' },
-    { countryName: 'Korea', iso3Code: 'KOR' },
-  ];
+  // const countries = [
+  //   { countryName: 'Japan', iso3Code: 'JPN' },
+  //   { countryName: 'Korea', iso3Code: 'KOR' },
+  // ];
 
   // 📌 이미지 선택 (여러 개 선택 가능)
   const pickImage = async () => {
@@ -136,8 +142,8 @@ export default function AddPostScreen() {
       <DropDownPicker
         open={open}
         value={iso3Code}
-        items={countries.map((item) => ({
-          label: item.countryName,
+        items={sortedCountries.map((item) => ({
+          label: item.koreanName,
           value: item.iso3Code,
         }))}
         setOpen={setOpen}
@@ -145,6 +151,7 @@ export default function AddPostScreen() {
         placeholder='국가 선택'
         dropDownContainerStyle={styles.dropdownContainer}
         style={styles.dropdown}
+        modalAnimationType='slide'
       />
       <TextInput
         style={[styles.input, styles.textArea]}
