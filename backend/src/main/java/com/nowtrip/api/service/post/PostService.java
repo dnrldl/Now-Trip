@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -42,10 +43,10 @@ public class PostService {
 
     // 게시글 조회 (로그인 유저 내 게시글)
     public Page<PostResponse> getMyPosts(int page, int size) {
-        String email = authenticationHelper.getCurrentUser().getUsername();
+        String nickname = authenticationHelper.getCurrentUser().getNickname();
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Post> posts = postRepository.findAllWithoutCommentsByEmail(email, pageable);
+        Page<Post> posts = postRepository.findAllWithoutCommentsByNickname(nickname, pageable);
 
         return posts.map(this::convertToPostResponse);
     }
@@ -59,14 +60,14 @@ public class PostService {
     }
 
     // 국가 코드로 게시글 조회
-    public List<PostResponse> getPostsByCountry(String iso3Code) {
-        if (iso3Code == null || iso3Code.isBlank()) {
+    public Page<PostResponse> getPostsByCountry(int page, int size, String iso2Code) {
+        if (iso2Code == null || iso2Code.isBlank()) {
             throw new IllegalArgumentException("ISO3 코드는 null이거나 빈 값일 수 없습니다");
         }
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Post> posts = postRepository.findByCountryIso2Code(iso2Code, pageable);
 
-        return postRepository.findByCountryIso3Code(iso3Code).stream()
-                .map(this::convertToPostResponse)
-                .collect(Collectors.toList());
+        return convertPostsToPostResponses(posts);
     }
 
     // 등록
@@ -77,11 +78,11 @@ public class PostService {
         post.setImageUrl(request.getImageUrl());
 
         // 국가 코드
-        if (request.getIso3Code() == null || request.getIso3Code().trim().isEmpty()) {
+        if (request.getIso2Code() == null || request.getIso2Code().trim().isEmpty()) {
             post.setCountry(null);
         } else {
-            Country country = countryRepository.findByIso3Code(request.getIso3Code())
-                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 ISO3 코드입니다: " + request.getIso3Code()));
+            Country country = countryRepository.findByIso2Code(request.getIso2Code())
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 ISO2 코드입니다: " + request.getIso2Code()));
             post.setCountry(country);
         }
 
@@ -92,9 +93,9 @@ public class PostService {
     public void updatePost(Long id, PostRequest request) {
         Post savedPost = postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String nickName = authenticationHelper.getCurrentUser().getNickname();
 
-        if (savedPost.getCreatedBy() == null || !savedPost.getCreatedBy().equals(currentEmail)) {
+        if (savedPost.getCreatedBy() == null || !savedPost.getCreatedBy().equals(nickName)) {
             throw new SecurityException("게시글 변경 권한이 없습니다");
         }
 
@@ -109,9 +110,9 @@ public class PostService {
         Post savedPost = postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
 
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String nickName = authenticationHelper.getCurrentUser().getNickname();
 
-        if (savedPost.getCreatedBy() == null || !savedPost.getCreatedBy().equals(currentEmail)) {
+        if (savedPost.getCreatedBy() == null || !savedPost.getCreatedBy().equals(nickName)) {
             throw new SecurityException("게시글 삭제 권한이 없습니다");
         }
 

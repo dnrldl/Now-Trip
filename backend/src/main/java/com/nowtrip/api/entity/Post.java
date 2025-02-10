@@ -25,7 +25,6 @@ public class Post extends Auditable {
     @Column(nullable = false, columnDefinition = "TEXT") // 문자열 제한 x
     private String content;
 
-    @Column(nullable = false)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

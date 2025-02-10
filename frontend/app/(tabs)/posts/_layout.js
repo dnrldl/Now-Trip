@@ -20,9 +20,9 @@ export default function PostsLayout() {
           title: '게시글 작성',
           // presentation: 'modal',
           headerShown: true,
-          headerRight: () => (
-            <Button title='닫기' onPress={() => router.dismiss()} />
-          ),
+          // headerRight: () => (
+          //   <Button title='닫기' onPress={() => router.dismiss()} />
+          // ),
           headerBackButtonDisplayMode: 'minimal',
         }}
       />

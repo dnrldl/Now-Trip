@@ -181,7 +181,9 @@ const PostItem = ({ item, router }) => {
       )}
 
       {/* 이미지 */}
-      <Image source={{ uri: item.imgUrl }} style={styles.image} />
+      {item.imgUrl && (
+        <Image source={{ uri: item.imgUrl }} style={styles.image} />
+      )}
 
       {/* 좋아요, 댓글 */}
       <PostAction post={item} />

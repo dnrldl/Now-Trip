@@ -20,7 +20,7 @@ import { DataContext } from '../../../contexts/DataContext';
 export default function AddPostScreen() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [iso3Code, setIso3Code] = useState(null); // 선택한 국가
+  const [iso2Code, setIso2Code] = useState(null); // 선택한 국가
   const [image, setImage] = useState(null); // 선택한 이미지
   const [imageType, setImageType] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -77,7 +77,7 @@ export default function AddPostScreen() {
       const response = await addPost({
         title,
         content,
-        iso3Code,
+        iso2Code,
         imageUrl: uploadedImageUrl,
       });
 
@@ -114,13 +114,13 @@ export default function AddPostScreen() {
       />
       <DropDownPicker
         open={open}
-        value={iso3Code}
+        value={iso2Code}
         items={sortedCountries.map((item) => ({
           label: item.koreanName,
-          value: item.iso3Code,
+          value: item.iso2Code,
         }))}
         setOpen={setOpen}
-        setValue={setIso3Code}
+        setValue={setIso2Code}
         placeholder='국가 선택'
         dropDownContainerStyle={styles.dropdownContainer}
         style={styles.dropdown}
@@ -140,7 +140,15 @@ export default function AddPostScreen() {
       </TouchableOpacity>
 
       {/* 이미지 미리보기 */}
-      {image && <Image source={{ uri: image }} style={styles.preview} />}
+      {image && (
+        <TouchableOpacity onLongPress={() => setImage(null)}>
+          <Image
+            source={{ uri: image }}
+            style={styles.preview}
+            resizeMode='cover'
+          />
+        </TouchableOpacity>
+      )}
 
       {/* 게시글 등록 버튼 */}
       <TouchableOpacity

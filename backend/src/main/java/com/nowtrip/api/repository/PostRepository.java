@@ -11,12 +11,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
-    List<Post> findByCountryIso3Code(String iso3Code);
+    Page<Post> findByCountryIso2Code(String iso2Code, Pageable pageable);
     @Query("SELECT p FROM Post p ORDER BY p.createdAt DESC")
     Page<Post> findAllWithoutComments(Pageable pageable);
 
-    @Query("SELECT p FROM Post p WHERE p.createdBy = :email ORDER BY p.createdAt DESC")
-    Page<Post> findAllWithoutCommentsByEmail(@Param("email") String email, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.createdBy = :nickname ORDER BY p.createdAt DESC")
+    Page<Post> findAllWithoutCommentsByNickname(@Param("nickname") String nickname, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + :delta WHERE p.id = :postId")

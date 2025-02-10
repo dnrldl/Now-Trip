@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CountryRepository extends JpaRepository<Country, Long> {
-    Optional<Country> findByIso3Code(String iso3Code);
+    Optional<Country> findByIso2Code(String iso3Code);
 
     @EntityGraph(attributePaths = {"currency"})
     List<Country> findAll();

@@ -50,10 +50,13 @@ public class PostController {
         return ResponseEntity.ok(postResponse);
     }
 
-    @GetMapping("/country/{iso3Code}")
-    public ResponseEntity<List<PostResponse>> getAllPostsByCountry(@PathVariable String iso3Code) {
-        List<PostResponse> postResponses = postService.getPostsByCountry(iso3Code);
-        return ResponseEntity.ok(postResponses);
+    @GetMapping("/country/{iso2Code}")
+    public ResponseEntity<Page<PostResponse>> getAllPostsByCountry(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @PathVariable String iso2Code) {
+        Page<PostResponse> responses = postService.getPostsByCountry(page, size, iso2Code);
+        return ResponseEntity.ok(responses);
     }
 
     @PutMapping("/{id}")
