@@ -21,4 +21,9 @@ public class PostImage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+    public PostImage(Post post, String imageUrl) {
+        this.post = post;
+        this.imageUrl = imageUrl;
+    }
 }

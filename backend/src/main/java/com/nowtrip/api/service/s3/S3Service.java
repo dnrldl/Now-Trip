@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 
 @Service
@@ -23,36 +26,35 @@ public class S3Service {
     @Value("${cloudfront.domain}")
     private String cloudFrontDomain;
 
-    public List<Map<String, String>> generatePresignedUrl(List<String> originalFileNames) {
-        List<Map<String, String>> result = new ArrayList<>();
-
-        for (String originalFileName : originalFileNames) {
-            String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            String newFileName = UUID.randomUUID() + fileExtension;
-            String contentType = getContentType(fileExtension);
-
-            // 만료 시간 설정 (5분)
-            Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 5);
-
-            // 요청 생성
-            GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                    new GeneratePresignedUrlRequest(bucketName, "uploads/" + newFileName) // 경로(파일이름)
-                            .withMethod(HttpMethod.PUT)
-                            .withContentType(contentType)
-                            .withExpiration(expiration);
-
-            // URL 생성
-            URL presignedUrl = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-            Map<String, String> fileData = new HashMap<>();
-
-            fileData.put("presignedUrl", presignedUrl.toString());
-            fileData.put("fileUrl", cloudFrontDomain + "/uploads/" + newFileName);
-
-            result.add(fileData);
+    public Map<String, String> generatePresignedUrl(String originalFileName) {
+        String fileExtension = "";
+        if (originalFileName.contains(".")) {
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
         }
 
-        return result;
+        // UUID를 이용한 파일명 변환
+        String newFileName = UUID.randomUUID() + fileExtension;
+        String contentType = getContentType(fileExtension);
+
+        // 만료 시간 설정 (5분)
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 5);
+
+        // 요청 생성
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucketName, "uploads/" + newFileName) // 경로(파일이름)
+                        .withMethod(HttpMethod.PUT)
+                        .withContentType(contentType)
+                        .withExpiration(expiration);
+
+        // URL 생성
+        URL presignedUrl = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+
+        Map<String, String> urls = new HashMap<>();
+
+        urls.put("presignedUrl", presignedUrl.toString());
+        urls.put("fileUrl", cloudFrontDomain + "/uploads/" + newFileName);
+
+        return urls;
     }
 
     private String getContentType(String fileExtension) {

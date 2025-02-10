@@ -30,7 +30,6 @@ export default function PostsScreen() {
   const { authState, loadTokens } = useAuth();
   const router = useRouter();
 
-  // 로그인 여부에 따라 공개/비공개글 API를 사용
   let fetchPosts = authState.isAuthenticated
     ? fetchPrivatePosts
     : fetchPublicPosts;
@@ -44,9 +43,9 @@ export default function PostsScreen() {
     setLoading(true);
     setRefreshing(false);
     try {
-      const data = await fetchPosts(0);
-      setIsLast(data.last);
-      setPosts(data.content);
+      const response = await fetchPosts(0);
+      setPosts(response.content);
+      setIsLast(false);
       setPage(0);
     } catch (err) {
       setError('게시글을 불러오는 중 문제가 발생했습니다.');
@@ -108,7 +107,7 @@ export default function PostsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 헤더 영역 */}
+      {/* 헤더 */}
       <View style={styles.header}>
         <Text style={styles.title}>게시판</Text>
         <TouchableOpacity style={styles.addButton} onPress={clickToAddPost}>
@@ -132,22 +131,11 @@ export default function PostsScreen() {
   );
 }
 
-/** 개별 게시글 컴포넌트 */
+// 개별 게시글
 const PostItem = ({ item, router }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 };
+  const [showFullText, setShowFullText] = useState(false);
 
-  const onViewableItemsChanged = ({ viewableItems }) => {
-    if (viewableItems.length > 0) {
-      setCurrentIndex(viewableItems[0].index || 0);
-    }
-  };
-
-  const viewabilityConfigCallbackPairs = useRef([
-    { viewabilityConfig, onViewableItemsChanged },
-  ]);
-
-  // 상세보기로 이동
+  // 상세 페이지 이동
   const goToDetail = () => {
     router.push({
       pathname: '/posts/details',
@@ -157,9 +145,8 @@ const PostItem = ({ item, router }) => {
 
   return (
     <TouchableOpacity style={styles.postContainer} onPress={goToDetail}>
-      {/* 상단 작성자 영역 */}
+      {/* 작성자 정보 */}
       <View style={styles.postHeader}>
-        {/* 프로필 이미지 (없다면 기본 이미지 사용) */}
         <Image
           source={{
             uri: item.authorProfileImageUrl || 'https://placehold.co/36x36',
@@ -167,126 +154,68 @@ const PostItem = ({ item, router }) => {
           style={styles.profileImage}
         />
         <View style={styles.userInfo}>
-          {/* 닉네임 & (예시) 랭크 */}
-          <View style={styles.userRow}>
-            <Text style={styles.username}>{item.createdBy}</Text>
-            <Text style={styles.userBadge}>20대 · 상위1%</Text>
-          </View>
-          {/* 작성시간 */}
+          <Text style={styles.username}>{item.createdBy}</Text>
           <Text style={styles.postDate}>
             <DateInfo createdAt={item.createdAt} />
           </Text>
         </View>
       </View>
 
-      {/* 게시글 텍스트 내용 */}
-      {item.content ? (
+      {/* 제목 */}
+      <Text style={styles.postTitle}>{item.title}</Text>
+
+      {/* 내용 (더보기 기능 포함) */}
+      {item.content.length > 100 ? (
+        <>
+          <Text style={styles.postContent}>
+            {showFullText ? item.content : `${item.content.slice(0, 100)}...`}
+          </Text>
+          <TouchableOpacity onPress={() => setShowFullText(!showFullText)}>
+            <Text style={styles.moreText}>
+              {showFullText ? '접기' : '더보기'}
+            </Text>
+          </TouchableOpacity>
+        </>
+      ) : (
         <Text style={styles.postContent}>{item.content}</Text>
-      ) : null}
-
-      {/* 게시물 이미지 슬라이더 */}
-      {item.imgUrl && item.imgUrl.length > 0 && (
-        <View style={styles.imageSliderContainer}>
-          <FlatList
-            data={item.imgUrl}
-            horizontal
-            pagingEnabled
-            decelerationRate='fast'
-            snapToAlignment='center'
-            snapToInterval={SCREEN_WIDTH}
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(image, index) => `${item.id}-image-${index}`}
-            renderItem={({ item: imageUri }) => (
-              <Image
-                source={{ uri: imageUri }}
-                style={styles.postImage}
-                resizeMode='cover'
-              />
-            )}
-            viewabilityConfigCallbackPairs={
-              viewabilityConfigCallbackPairs.current
-            }
-          />
-
-          {/* 슬라이드 인디케이터 */}
-          <View style={styles.indicatorContainer}>
-            {item.imgUrl.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.indicator,
-                  {
-                    backgroundColor:
-                      index === currentIndex ? '#007BFF' : '#ccc',
-                  },
-                ]}
-              />
-            ))}
-          </View>
-        </View>
       )}
 
-      {/* 좋아요, 댓글(예시로 PostAction 사용) */}
-      <View style={styles.footerActions}>
-        <PostAction post={item} />
-      </View>
+      {/* 이미지 */}
+      <Image source={{ uri: item.imgUrl }} style={styles.image} />
+
+      {/* 좋아요, 댓글 */}
+      <PostAction post={item} />
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  // 전체 컨테이너
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  // 헤더
+  container: { flex: 1, backgroundColor: '#fff' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingTop: 15,
-    paddingBottom: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
+  title: { fontSize: 22, fontWeight: 'bold' },
   addButton: {
     backgroundColor: '#007BFF',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
   },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  addButtonText: { color: '#fff', fontWeight: 'bold' },
 
-  // 로딩/에러 화면 중앙 배치
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-  },
-
-  // 개별 게시글 컨테이너
   postContainer: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderBottomWidth: 8,
-    borderBottomColor: '#f8f8f8',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
     backgroundColor: '#fff',
   },
-  // 상단 헤더(작성자 정보)
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -296,71 +225,22 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    marginRight: 8,
-    backgroundColor: '#ccc',
+    marginRight: 10,
   },
   userInfo: {
     justifyContent: 'center',
   },
-  userRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  username: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginRight: 6,
-  },
-  userBadge: {
-    fontSize: 13,
-    color: '#ff4500',
-    backgroundColor: '#ffece6',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  postDate: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
+  username: { fontSize: 15, fontWeight: '600' },
+  postDate: { fontSize: 12, color: '#999' },
 
-  // 게시글 본문 텍스트
-  postContent: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#333',
-    marginBottom: 8,
-  },
+  postTitle: { fontSize: 17, fontWeight: 'bold', marginBottom: 5 },
+  postContent: { fontSize: 14, color: '#333', marginBottom: 5 },
+  moreText: { fontSize: 14, color: '#666', marginTop: 3 },
 
-  // 이미지 슬라이더
-  imageSliderContainer: {
-    position: 'relative',
-    marginBottom: 10,
-  },
-  postImage: {
-    width: SCREEN_WIDTH,
-    height: 300,
-    backgroundColor: '#eee',
-  },
-  indicatorContainer: {
-    position: 'absolute',
-    bottom: 10,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  indicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-
-  // 하단 좋아요/댓글 등 액션
-  footerActions: {
-    marginTop: 4,
+  image: {
+    width: SCREEN_WIDTH - 30,
+    height: 200,
+    borderRadius: 8,
+    marginTop: 10,
   },
 });

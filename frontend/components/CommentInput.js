@@ -56,7 +56,7 @@ export default function CommentInput({ onSubmit }) {
 
     const keyboardWillHide = Keyboard.addListener('keyboardWillHide', () => {
       Animated.timing(keyboardHeight, {
-        toValue: 0, // 키보드 내려가면 원래 위치로
+        toValue: 20, // 키보드 내려가면 원래 위치로
         duration: 300,
         useNativeDriver: false,
       }).start();
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 20,
+    bottom: 0,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#ddd',

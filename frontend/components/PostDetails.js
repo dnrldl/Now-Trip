@@ -1,10 +1,19 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import {
+  Alert,
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { addComment, fetchComments, fetchPost } from '../api/postApi';
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import DateInfo from './DateInfo';
 import CommentList from './CommentList';
 import CommentInput from './CommentInput';
+import PostAction from './PostAction';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function PostDetails() {
   const router = useRouter();
@@ -13,14 +22,13 @@ export default function PostDetails() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
+  const { authState } = useAuth();
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const postRes = await fetchPost(postId);
       setPost(postRes);
-
-      console.log(postRes);
 
       const commentsRes = await fetchComments(postId);
       setComments(commentsRes);
@@ -39,8 +47,7 @@ export default function PostDetails() {
     }
     try {
       const response = await addComment(postId, comment);
-      const newComment = response.content;
-
+      const newComment = response;
       setComments((prevComments) => [newComment, ...prevComments]);
     } catch (err) {
       console.error('댓글 추가 중 오류:', err);
@@ -55,7 +62,7 @@ export default function PostDetails() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size='large' color='#fff' />
+        <ActivityIndicator size='large' color='#666' />
         <Text style={styles.loadingText}>데이터를 불러오는 중입니다...</Text>
       </View>
     );
@@ -65,11 +72,17 @@ export default function PostDetails() {
     <View style={styles.container}>
       {post && (
         <View style={styles.postBox}>
-          <Text style={styles.title}>{post.title}</Text>
-          <Text style={styles.meta}>
-            {post.createdBy} • <DateInfo createdAt={post.createdAt} />
-          </Text>
+          {/* 상단: 작성자 + 시간 */}
+          <View style={styles.header}>
+            <Text style={styles.author}>{post.createdBy}</Text>
+            <Text style={styles.dot}>·</Text>
+            <DateInfo createdAt={post.createdAt} style={styles.dateText} />
+          </View>
 
+          {/* 제목 */}
+          <Text style={styles.title}>{post.title}</Text>
+
+          {/* 이미지 */}
           <View style={styles.imageContainer}>
             {imageLoading && (
               <ActivityIndicator
@@ -81,19 +94,23 @@ export default function PostDetails() {
             <Image
               source={{ uri: post.imgUrl }}
               style={styles.image}
-              resizeMode='center'
+              resizeMode='cover'
               onLoadStart={() => setImageLoading(true)}
               onLoadEnd={() => setImageLoading(false)}
             />
-            <Text style={styles.content}>{post.content}</Text>
           </View>
+
+          {/* 본문 내용 */}
+          <Text style={styles.content}>{post.content}</Text>
         </View>
       )}
+
+      <PostAction post={post} authState={authState} />
 
       {/* 댓글 리스트 */}
       <CommentList comments={comments} />
 
-      {/* 댓글 입력 부분 */}
+      {/* 댓글 입력 영역 */}
       <CommentInput onSubmit={handleAddComment} />
     </View>
   );
@@ -105,22 +122,55 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 10,
+  postBox: {
+    marginBottom: 30,
   },
-  postBox: {},
-  meta: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  author: {
     fontSize: 14,
-    color: '#aaa',
-    marginBottom: 20,
+    color: '#555',
+    fontWeight: 'bold',
+  },
+  dot: {
+    marginHorizontal: 5,
+    color: '#999',
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#999',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 12,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 220,
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
+    marginBottom: 12,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  imageLoader: {
+    position: 'absolute',
+    zIndex: 1,
+    alignSelf: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   content: {
     fontSize: 16,
-    color: '#000',
-    marginBottom: 30,
+    lineHeight: 22,
+    color: '#333',
   },
   center: {
     flex: 1,
@@ -128,24 +178,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#fff',
     marginTop: 10,
-  },
-  imageContainer: {
-    width: '100%',
-    height: 250, // 이미지 높이 지정
-    justifyContent: 'center',
-    // alignItems: 'center',
-    backgroundColor: '#f0f0f0', // 로딩 중일 때 기본 배경색 추가
-  },
-  imageLoader: {
-    position: 'absolute', // 스피너를 이미지 중앙에 배치
-    zIndex: 1,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
+    color: '#666',
   },
 });

@@ -25,25 +25,20 @@ public class Post extends Auditable {
     @Column(nullable = false, columnDefinition = "TEXT") // 문자열 제한 x
     private String content;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PostImage> images = new ArrayList<>();
+    @Column(nullable = false)
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private Country country;
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-//    private List<Comment> comments;
-
-    @Column(nullable = false)
-    private Integer likeCount = 0;
-
-    @Column(nullable = false)
-    private Integer commentCount = 0;
-
-    @Column(nullable = false)
-    private Integer viewCount = 0;
+    // 기본형(int) -> 0이 자동 할당, null 허용 X
+    // 래퍼 클래스(Integer) -> 기본값 X, null 허용
+    private int likeCount;
+    private int commentCount;
+    private int viewCount;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
+
 }

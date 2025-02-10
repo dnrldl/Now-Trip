@@ -18,11 +18,12 @@ export default function PostsLayout() {
         name='addPost'
         options={{
           title: '게시글 작성',
-          presentation: 'modal',
+          // presentation: 'modal',
           headerShown: true,
           headerRight: () => (
             <Button title='닫기' onPress={() => router.dismiss()} />
           ),
+          headerBackButtonDisplayMode: 'minimal',
         }}
       />
     </Stack>
