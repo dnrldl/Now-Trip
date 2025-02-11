@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { fetchExchangeHistoryWithChange } from '../api/exchangeRateApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { DataContext } from '../contexts/DataContext';
+import FlagImage from '../components/FlagImage';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -29,7 +32,14 @@ export default function ExchangeDetailsScreen() {
   const [latestData, setLatestData] = useState(0);
   const [labels, setLabels] = useState([]);
   const { currency } = useLocalSearchParams();
+  const { currencies } = useContext(DataContext);
   const router = useRouter();
+  const relatedCountries = currencies
+    .find((item) => item.code == currency)
+    .countryCodes.map((a) => a.toLowerCase());
+  const currencyName = currencies.find(
+    (item) => item.code == currency
+  ).koreanName;
 
   const fetchData = async (currency, filter) => {
     try {
@@ -157,7 +167,24 @@ export default function ExchangeDetailsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>{currency}</Text>
         <Text style={styles.curInfo}>1USD 기준</Text>
-        <Text style={styles.currencyValue}>{latestData.toFixed(2)}</Text>
+
+        {/* 환율을 사용하는 국가 리스트 */}
+        <FlatList
+          data={relatedCountries} // 예: ['kr', 'jp', 'cn']
+          horizontal
+          keyExtractor={(item) => item}
+          contentContainerStyle={styles.flagContainer}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.flagWrapper}>
+              <FlagImage countryCode={item} style={styles.flagImage} />
+            </View>
+          )}
+        />
+
+        <Text style={styles.currencyValue}>
+          {latestData.toFixed(2)} {currencyName}
+        </Text>
         <Text style={[styles.subtext, { color: getGraphColor() }]}>
           {selectedTab === '1주'
             ? '지난주보다'
@@ -228,6 +255,23 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'flex-start',
     marginBottom: 5,
+  },
+  flagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  flagWrapper: {
+    width: 40, // 크기 조정 (더 작게)
+    height: 40,
+    borderRadius: 50, // 원형 유지
+    overflow: 'hidden',
+    marginHorizontal: 5, // 국기 간격 조정
+  },
+  flagImage: {
+    width: '100%', // 부모 컨테이너의 크기에 맞춤
+    height: '100%',
+    resizeMode: 'contain', // 국기가 잘리지 않고 축소되도록 설정
   },
   title: {
     fontSize: 18,

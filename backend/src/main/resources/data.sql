@@ -40,7 +40,7 @@ INSERT INTO country (id, name, korean_name, iso2code, iso3code, currency_id) VAL
 (10, 'Greece', '그리스', 'GR', 'GRC', 2),
 (11, 'Guam', '괌', 'GU', 'GUM', 7),
 (12, 'Hong Kong', '홍콩', 'HK', 'HKG', 8),
-(13, 'Indonesia', '인도네시아', 'IN', 'IDN', 9),
+(13, 'Indonesia', '인도네시아', 'ID', 'IDN', 9),
 (14, 'Italy', '이탈리아', 'IT', 'ITA', 2),
 (15, 'Japan', '일본', 'JP', 'JPN', 10),
 (16, 'Malaysia', '말레이시아', 'MY', 'MYS', 11),

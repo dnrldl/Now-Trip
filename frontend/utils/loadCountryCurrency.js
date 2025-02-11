@@ -52,3 +52,13 @@ export const getCurrencies = async () => {
     return null;
   }
 };
+
+export const deleteDatas = async () => {
+  try {
+    await AsyncStorage.removeItem(COUNTRIES_KEY);
+    await AsyncStorage.removeItem(CURRENCIES_KEY);
+    console.log('캐시된 국가 및 통화 데이터 삭제 완료');
+  } catch (error) {
+    console.error('데이터 삭제 실패:', error);
+  }
+};

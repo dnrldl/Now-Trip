@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import * as FileSystem from 'expo-file-system';
 import { SvgUri } from 'react-native-svg';
 
-const FlagImage = ({ countryCode }) => {
+const FlagImage = ({ countryCode, style }) => {
   const [localUri, setLocalUri] = useState(null);
   const cdnBaseUrl = 'https://d3kl0w556e4fca.cloudfront.net/flags';
   const imageUrl = `${cdnBaseUrl}/${countryCode}.png`;
@@ -37,7 +37,7 @@ const FlagImage = ({ countryCode }) => {
   return (
     <Image
       source={{ uri: localUri }}
-      style={{ width: '100%', height: '100%' }}
+      style={[style, { width: '100%', height: '100%' }]}
       resizeMode='center'
     />
   );

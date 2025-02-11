@@ -1,5 +1,9 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { getCountries, getCurrencies } from '../utils/loadCountryCurrency';
+import {
+  getCountries,
+  getCurrencies,
+  deleteDatas,
+} from '../utils/loadCountryCurrency';
 
 export const DataContext = createContext();
 

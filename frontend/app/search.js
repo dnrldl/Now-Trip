@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import FlagImage from '../components/FlagImage';
-import { fetchCurrencies } from '../api/currencyApi';
 import { DataContext } from '../contexts/DataContext';
 
 export default function SearchScreen() {
@@ -21,21 +20,9 @@ export default function SearchScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    // const fetchData = async () => {
-    //   try {
-    //     const response = await fetchCurrencies();
-    //     console.log('API 응답 데이터:', response);
-    //     setExchangeRates(response);
-    //     setFilteredRates(response);
-    //   } catch (error) {
-    //     console.error('환율 데이터 로딩 실패:', error);
-    //   }
-    // };
-
-    // fetchData();
     setExchangeRates(currencies);
     setFilteredRates(currencies);
-    console.log(currencies);
+    console.log(filteredRates);
   }, []);
 
   const handleSearch = (query) => {
@@ -81,7 +68,7 @@ export default function SearchScreen() {
               >
                 <View style={styles.item}>
                   <View style={styles.imageContainer}>
-                    <FlagImage countryCode={item.currencyFlagCode} />
+                    <FlagImage countryCode={item.flagCode} />
                   </View>
                   <View style={styles.infoContainer}>
                     <Text style={styles.currencyText}>
