@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,32 +9,33 @@ import {
   Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  fetchExchangeRateList,
-  fetchExchangeRates,
-} from '../api/exchangeRateApi';
 import FlagImage from '../components/FlagImage';
 import { fetchCurrencies } from '../api/currencyApi';
+import { DataContext } from '../contexts/DataContext';
 
 export default function SearchScreen() {
   const [exchangeRates, setExchangeRates] = useState([]);
+  const { currencies } = useContext(DataContext);
   const [filteredRates, setFilteredRates] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetchCurrencies();
-        console.log('API 응답 데이터:', response);
-        setExchangeRates(response);
-        setFilteredRates(response);
-      } catch (error) {
-        console.error('환율 데이터 로딩 실패:', error);
-      }
-    };
+    // const fetchData = async () => {
+    //   try {
+    //     const response = await fetchCurrencies();
+    //     console.log('API 응답 데이터:', response);
+    //     setExchangeRates(response);
+    //     setFilteredRates(response);
+    //   } catch (error) {
+    //     console.error('환율 데이터 로딩 실패:', error);
+    //   }
+    // };
 
-    fetchData();
+    // fetchData();
+    setExchangeRates(currencies);
+    setFilteredRates(currencies);
+    console.log(currencies);
   }, []);
 
   const handleSearch = (query) => {
@@ -80,7 +81,7 @@ export default function SearchScreen() {
               >
                 <View style={styles.item}>
                   <View style={styles.imageContainer}>
-                    <FlagImage countryCode={item.flagCode} />
+                    <FlagImage countryCode={item.currencyFlagCode} />
                   </View>
                   <View style={styles.infoContainer}>
                     <Text style={styles.currencyText}>
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: 50,
     height: 50,
-    borderRadius: 10,
+    borderRadius: 50,
     overflow: 'hidden',
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
