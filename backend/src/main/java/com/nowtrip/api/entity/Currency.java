@@ -3,6 +3,9 @@ package com.nowtrip.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -29,5 +32,8 @@ public class Currency {
 
     @Column(nullable = false, length = 2)
     private String currencyFlagCode; // jp
+
+    @OneToMany(mappedBy = "currency")
+    private List<Country> countries = new ArrayList<>();
 
 }

@@ -1,5 +1,6 @@
 package com.nowtrip.api.service.currency;
 
+import com.nowtrip.api.entity.Country;
 import com.nowtrip.api.entity.Currency;
 import com.nowtrip.api.repository.CurrencyRepository;
 import com.nowtrip.api.response.currency.CurrencyResponse;
@@ -15,12 +16,16 @@ public class CurrencyService {
     private final CurrencyRepository currencyRepository;
 
     public List<CurrencyResponse> getCurrencies() {
-        List<Currency> currencies = currencyRepository.findAll();
+        List<Currency> currencies = currencyRepository.findAllWithCountries();
 
         return currencies.stream().map(currency -> new CurrencyResponse(
                 currency.getCode(),
                 currency.getKoreanName(),
-                currency.getCurrencyFlagCode()
+                currency.getCurrencyFlagCode(),
+                currency.getCountries().stream().map(Country::getIso2Code)
+                        .collect(Collectors.toList())
         )).collect(Collectors.toList());
     }
+
+
 }

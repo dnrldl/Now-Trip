@@ -16,7 +16,7 @@ public class CountryService {
     private final CountryRepository countryRepository;
 
     public List<CountriesResponse> getAllCountries() {
-        List<Country> countries = countryRepository.findAll(Sort.by(Sort.Direction.ASC, "korean"));
+        List<Country> countries = countryRepository.findAll(Sort.by(Sort.Direction.ASC, "koreanName"));
 
         return countries.stream().map(this::convertToDto).collect(Collectors.toList());
     }
