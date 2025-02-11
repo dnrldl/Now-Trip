@@ -10,8 +10,9 @@ export default function PostsLayout() {
         name='details'
         options={{
           title: '게시글 상세',
-          presentation: 'modal',
+          // presentation: 'modal',
           headerShown: true,
+          headerBackButtonDisplayMode: 'minimal',
         }}
       />
       <Stack.Screen

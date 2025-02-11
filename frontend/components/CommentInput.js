@@ -32,7 +32,7 @@ export default function CommentInput({ onSubmit }) {
         {
           text: '확인',
           onPress: () => {
-            router.push('/login');
+            router.dismiss();
           },
         },
       ]);

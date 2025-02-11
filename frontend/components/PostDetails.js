@@ -83,22 +83,24 @@ export default function PostDetails() {
           <Text style={styles.title}>{post.title}</Text>
 
           {/* 이미지 */}
-          <View style={styles.imageContainer}>
-            {imageLoading && (
-              <ActivityIndicator
-                size='large'
-                color='#000'
-                style={styles.imageLoader}
+          {post.imgUrl && (
+            <View style={styles.imageContainer}>
+              {imageLoading && (
+                <ActivityIndicator
+                  size='large'
+                  color='#000'
+                  style={styles.imageLoader}
+                />
+              )}
+              <Image
+                source={{ uri: post.imgUrl }}
+                style={styles.image}
+                resizeMode='cover'
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
               />
-            )}
-            <Image
-              source={{ uri: post.imgUrl }}
-              style={styles.image}
-              resizeMode='cover'
-              onLoadStart={() => setImageLoading(true)}
-              onLoadEnd={() => setImageLoading(false)}
-            />
-          </View>
+            </View>
+          )}
 
           {/* 본문 내용 */}
           <Text style={styles.content}>{post.content}</Text>
