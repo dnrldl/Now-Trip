@@ -10,20 +10,18 @@
 > 
 ## 📌 주요 기능
 
-### 🏝 여행지 추천
-- **실시간 환율 반영**하여 예산 대비 가장 경제적인 여행지 추천
-- **각 나라의 물가 데이터를 반영**하여 체류 가능한 일수 계산
-- **여행 스타일(쇼핑, 자연, 문화 등) 선택 가능**
-
 ### 📊 환율 조회 및 시각화
-- API를 통해 **실시간 환율 데이터** 불러오기
-- **환율 변동 그래프 제공**으로 최근 하루, 1주, 3개월, 1년, 전체 환율 변동 확인 가능
-- **환율 변동률 시각화** 및 안정적인 환율 국가 추천
+- 외부 API를 통해 **실시간 환율 데이터** 불러와 저장 및 관리
+- **환율 변동 그래프**로 최근 하루, 1주, 3개월, 1년, 전체 환율 변동 확인 가능
 
 ### 📝 여행 정보 공유 (게시판 기능)
 - **여행 후기 및 정보 게시글 작성 가능**
+- **나라별 게시글 조회 기능**
 - **단일 이미지 업로드 지원 (S3 Presigned URL 활용)**
 - **좋아요 및 댓글 기능 지원**
+
+### 환율 계산기
+- 실시간 환율을 이용하여 통화간 계산
 
 ### 📍 국가 및 통화 데이터 관리
 - **국가 및 통화 데이터를 정적 파일 + DB로 관리**
@@ -70,12 +68,13 @@ nowtrip/
 
 ### 🔹 환경 변수 설정
 - `frontend/.env`
-- EXPO를 사용한다면 `EXPO_PUBLIC_[NAME]=VALUE` 형식을 갖춰야 함
+- Expo를 사용한다면 `EXPO_PUBLIC_[NAME]=VALUE` 형식을 갖춰야 함
 ```env
 EXPO_PUBLIC_API_URL = http://localhost:8080/api
+EXPO_PUBLIC_CDN_FLAG_URL = https://<your-domain>.cloudfront.net/flags
 ```
 
-- `resource/application.yml`
+- `resources/application.yml`
 ```yaml
 spring:
   application:
@@ -105,6 +104,7 @@ spring:
       host: localhost
       port: 6379
 
+# AWS 설정
 cloud:
   aws:
     s3:
@@ -116,10 +116,10 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
-
 cloudfront:
   domain: https://<your-domain>.cloudfront.net
 
+# JWT secret-key
 jwt:
   secret:
     key: your-secret-key
@@ -130,15 +130,14 @@ exchange:
 ```
 
 ### 🔹 데이터베이스
-- brew를 통해 redis와 mysql 설치
+- brew를 통해 redis와 mysql 설치 후
+- 데이터베이스 서버 활성화
 ```bash
-# 데이터베이스 서버 활성화
 brew services start redis
 brew services start mysql
 ```
-- mysql 서버 접속 후 'nowtrip' database 생성
+- mysql 서버 접속 후 `nowtrip` database 생성
 ```bash
-
 mysql -u root -p
 CREATE DATABASE nowtrip;
 ```
@@ -160,7 +159,7 @@ cd backend
 
 ---
 
-## 📌 API 주요 기능
+## 📌 주요 API
 
 ### 🔹 국가 및 통화 데이터 API
 - `/api/countries` : 모든 국가 데이터 반환
@@ -173,6 +172,7 @@ cd backend
 ### 🔹 게시판 API
 - `GET: /api/posts` : 게시글 목록 조회
 - `GET: /api/posts/{postId}` : 특정 게시글 상세 조회
+- `POST: /api/posts` : 게시글
 - `POST: /api/posts/{postId}/like-toggle` : 게시글 좋아요 토글 기능
 
 ---
@@ -257,10 +257,10 @@ List<Object[]> findTopChangedRates();
 
 ## 📌 향후 개선 사항
 
-**추천 알고리즘 개선** (머신러닝 기반 추천 적용 가능)  
-**유저별 관심 여행지 저장 및 맞춤 추천**  
-**환율 변동 분석 및 예측 기능 추가**  
-**다국어 지원 (한국어, 영어, 일본어 등)**
+- **추천 알고리즘 개선** (머신러닝 기반 추천 적용 가능)
+- **유저별 관심 여행지 저장 및 맞춤 추천**  
+- **환율 변동 분석 및 예측 기능 추가**  
+- **다국어 지원 (한국어, 영어, 일본어 등)**
 
 ---
 
