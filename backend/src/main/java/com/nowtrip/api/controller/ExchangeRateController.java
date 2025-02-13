@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/exchange")
+@RequestMapping("/api/exchanges")
 @RequiredArgsConstructor
 public class ExchangeRateController {
     private final ExchangeRateService exchangeRateService;
@@ -27,7 +27,7 @@ public class ExchangeRateController {
     }
 
     // 가장 최신의 환율 모두 반환
-    @GetMapping
+    @GetMapping("/latest")
     public ResponseEntity<List<ExchangeResponse>> getExchangeRates() {
         List<ExchangeResponse> exchangeRates = exchangeRateService.getExchangeRates();
         return ResponseEntity.ok(exchangeRates);
@@ -40,7 +40,7 @@ public class ExchangeRateController {
     }
 
     // 가장 최신의 환율 반환
-    @GetMapping("/{targetCurrency}")
+    @GetMapping("/{targetCurrency}/latest")
     public ResponseEntity<ExchangeResponse> getExchangeRate(@PathVariable String targetCurrency) {
         ExchangeResponse exchangeRate = exchangeRateService.getExchangeRate(targetCurrency);
         return ResponseEntity.ok(exchangeRate);
