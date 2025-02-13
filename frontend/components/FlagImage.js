@@ -5,7 +5,7 @@ import { SvgUri } from 'react-native-svg';
 
 const FlagImage = ({ countryCode, style }) => {
   const [localUri, setLocalUri] = useState(null);
-  const cdnBaseUrl = 'https://d3kl0w556e4fca.cloudfront.net/flags';
+  const cdnBaseUrl = process.env.EXPO_PUBLIC_CDN_FLAG_URL;
   const imageUrl = `${cdnBaseUrl}/${countryCode}.png`;
   const localFilePath = `${FileSystem.documentDirectory}${countryCode}.png`;
 

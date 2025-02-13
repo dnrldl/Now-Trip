@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from '../utils/secureStore';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // 인증이 필요 없는 Axios 인스턴스
 export const publicAxios = axios.create({

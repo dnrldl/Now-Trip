@@ -70,8 +70,9 @@ nowtrip/
 
 ### 🔹 환경 변수 설정
 - `frontend/.env`
+- EXPO를 사용한다면 `EXPO_PUBLIC_[NAME]=VALUE` 형식을 갖춰야 함
 ```env
-EXPO_PUBLIC_API_URL=https://api.nowtrip.com
+EXPO_PUBLIC_API_URL = http://localhost:8080/api
 ```
 
 - `resource/application.yml`
@@ -247,8 +248,8 @@ List<Object[]> findTopChangedRates();
 - 이미지 업로드 -> S3에 업로드  
 - 이미지 제공 -> Cloudfront의 CDN 캐싱
 
-✅ 클라이언트 -> API 서버가 Presigned Url 반환 -> 클라이언트가 S3에 PUT요청(업로드) -> 데이터베이스에 CloudFront url 저장  
-✅ 이미지는 Cloudfront url을 통해 제공  
+✅ 클라이언트 -> API 서버가 Presigned Url 반환 -> 클라이언트가 S3에 PUT요청(업로드) -> 데이터베이스에 CloudFront 도메인 저장  
+✅ 이미지는 Cloudfront 도메인을 통해 제공  
 ✅ 이 방식은 API서버와 데이터베이스의 부하를 대폭 감소 시킴 (Presigned Url만 반환)  
 ✅ 그 결과, 이미지 크기에 따라 다르지만 평균 업로드, 다운로드의 성능이 80% 향상 
 
