@@ -1,7 +1,7 @@
 import { publicAxios } from './axiosInstance';
 import handleError from './handleApiError';
 
-const PATH = '/exchange';
+const PATH = '/exchanges';
 
 export const fetchExchangeRateList = async () => {
   try {
@@ -14,7 +14,7 @@ export const fetchExchangeRateList = async () => {
 
 export const fetchExchangeRates = async () => {
   try {
-    const response = await publicAxios.get(PATH);
+    const response = await publicAxios.get(PATH + '/latest');
     return response.data;
   } catch (error) {
     handleError(error);
@@ -34,5 +34,3 @@ export const fetchExchangeHistoryWithChange = async (currency, filter) => {
     handleError(error);
   }
 };
-
-// export const fetchExchangeHistory

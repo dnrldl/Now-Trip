@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/auth/login", "/api/auth/refresh-token",
                                 "/api/auth/validate-token", "/api/s3/**", "/api/currency",
-                                "/api/exchange/**", "/api/values/**", "/api/ppp/**", "/api/country/**",
+                                "/api/exchanges/**","/api/country/**",
                                 "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
