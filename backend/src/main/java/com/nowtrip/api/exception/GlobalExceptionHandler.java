@@ -18,7 +18,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // DTO 유효성 검증 실패
+    // 유효성 검증 실패 (회원가입 시)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         BindingResult bindingResult = ex.getBindingResult();
@@ -67,22 +67,10 @@ public class GlobalExceptionHandler {
     }
 
     // 잘못된 데이터 요청
-    @ExceptionHandler({IllegalArgumentException.class, UsernameNotFoundException.class})
+    @ExceptionHandler({IllegalArgumentException.class, UsernameNotFoundException.class, IllegalStateException.class})
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                "잘못된 요청",
-                Map.of("error", ex.getMessage())
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-
-    // 잘못된 데이터 요청
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalStateException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                "잘못된 요청",
-                Map.of("error", ex.getMessage())
+                ex.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -91,8 +79,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                "서버 내부 에러",
-                Map.of("error", ex.getMessage())
+                ex.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
