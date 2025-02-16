@@ -72,7 +72,7 @@ nowtrip/
 ```
 
 ### 데이터베이스 구조
-![Image](https://github.com/user-attachments/assets/12b86806-70bc-4eca-8f44-3f89e2f0e9c7)
+![Image](https://github.com/user-attachments/assets/fd7f152b-ad6e-4d66-8bec-684a3312fd32)
 
 ---
 
@@ -93,7 +93,7 @@ spring:
     name: nowtrip
     # MySql 설정
   datasource:
-    url: jdbc:mysql://localhost:3306/nowtrip
+    url: jdbc:mysql://localhost:3306/nowtrip # docker 라면 localhost -> container_name
     username: your-username
     password: your-password
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -113,7 +113,7 @@ spring:
 # redis 설정
   data:
     redis:
-      host: localhost
+      host: localhost # docker 라면 localhost -> container_name
       port: 6379
 
 # AWS 설정
@@ -250,20 +250,21 @@ List<Object[]> findTopChangedRates();
 ✅ 이처럼 복잡한 작업이 있는 경우엔 JPA만이 아닌 다른 방법을 찾는게 생산적 (JPQL, 네이티브 SQL 등등)
 ---
 
-### 🔹 이미지 업로드
+### 이미지 업로드
 
-#### 🔹 기존 방식: (데이터베이스에 이미지 저장)
+#### 기존 방식: (데이터베이스에 이미지 저장)
 ❌ 기존에는 이미지를 Base64(`MultiartFile`로 변환하여 DB에 저장하는 방식을 고려하였으나,  
 ❌ 파일의 크기때문에 업, 다운로드의 속도가 저하가 일어나 서버 리소스 사용량이 대폭 증가했음
 
-#### 🔹 개선 후 (AWS S3 + Cloudfront 활용)
+#### 개선 후 (AWS S3 + Cloudfront 활용)
 - 이미지 업로드 -> S3에 업로드
-- 이미지 제공 -> Cloudfront의 CDN 캐싱
+- 이미지 제공 -> Cloudfront의 CDN 캐싱  
+
 
 ✅ 클라이언트 -> API 서버가 Presigned Url 반환 -> 클라이언트가 S3에 PUT요청(업로드) -> 데이터베이스에 CloudFront 도메인 저장  
 ✅ 이미지는 Cloudfront 도메인을 통해 제공  
 ✅ 이 방식은 API서버와 데이터베이스의 부하를 대폭 감소 시킴 (Presigned Url만 반환)  
-✅ 그 결과, 이미지 크기에 따라 다르지만 평균 업로드, 다운로드의 성능이 80% 향상
+✅ 그 결과, 이미지 크기에 따라 다르지만 평균 업로드, 다운로드의 **성능 80% 향상**
 
 ---
 
