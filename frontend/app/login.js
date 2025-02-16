@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -7,20 +7,20 @@ import { useAuth } from '../contexts/AuthContext';
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async () => {
+    setError('');
+
     try {
       await login({ email, password });
-      // const response = await login({ email, password });
-      // const { accessToken, refreshToken } = response;
-      // await setTokens(accessToken, refreshToken); // 토큰 저장
       Alert.alert('로그인 성공', '환영합니다!');
-      router.replace('/'); // 메인 화면으로 이동
+      router.replace('/');
     } catch (error) {
-      console.log(error.details.error);
-      Alert.alert('로그인 실패', error.details.error || '오류가 발생했습니다.');
+      console.log('로그인 실패: ', error.message);
+      setError(error.message);
     }
   };
 
@@ -32,8 +32,9 @@ export default function LoginScreen() {
         placeholder='아이디'
         value={email}
         onChangeText={setEmail}
-        autoCapitalize={'none'}
+        autoCapitalize='none'
       />
+
       <TextInput
         style={styles.input}
         placeholder='비밀번호'
@@ -42,6 +43,7 @@ export default function LoginScreen() {
         secureTextEntry
         autoCapitalize='none'
       />
+      {error && <Text style={styles.errorText}>{error}</Text>}
       <Button title='로그인' onPress={handleLogin} />
       <Button title='회원가입' onPress={() => router.replace('/register')} />
     </View>
@@ -67,5 +69,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     borderRadius: 5,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 5,
+    marginLeft: 5,
   },
 });

@@ -17,9 +17,12 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [errors, setErrors] = useState({});
   const router = useRouter();
 
   const handleRegister = async () => {
+    setErrors({});
+
     if (password !== confirmPassword) {
       alert('비밀번호가 일치하지 않습니다.');
       return;
@@ -36,8 +39,8 @@ export default function RegisterScreen() {
       alert('회원가입이 완료되었습니다.');
       router.push('/login');
     } catch (error) {
-      alert('회원가입에 실패했습니다.');
-      console.error(error);
+      console.log('회원가입 오류: ', error);
+      setErrors(error.details);
     }
   };
 
@@ -53,6 +56,7 @@ export default function RegisterScreen() {
         keyboardType='email-address'
         autoCapitalize='none'
       />
+      {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
       <TextInput
         style={styles.input}
@@ -62,6 +66,9 @@ export default function RegisterScreen() {
         secureTextEntry={true}
         autoCapitalize='none'
       />
+      {errors.password && (
+        <Text style={styles.errorText}>{errors.password}</Text>
+      )}
 
       <TextInput
         style={styles.input}
@@ -71,6 +78,9 @@ export default function RegisterScreen() {
         secureTextEntry={true}
         autoCapitalize='none'
       />
+      {errors.confirmPassword && (
+        <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+      )}
 
       <TextInput
         style={styles.input}
@@ -79,6 +89,7 @@ export default function RegisterScreen() {
         onChangeText={setName}
         autoCapitalize='none'
       />
+      {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
       <TextInput
         style={styles.input}
@@ -87,6 +98,9 @@ export default function RegisterScreen() {
         onChangeText={setNickname}
         autoCapitalize='none'
       />
+      {errors.nickname && (
+        <Text style={styles.errorText}>{errors.nickname}</Text>
+      )}
 
       <TextInput
         style={styles.input}
@@ -95,6 +109,9 @@ export default function RegisterScreen() {
         onChangeText={setPhoneNumber}
         keyboardType='phone-pad'
       />
+      {errors.phoneNumber && (
+        <Text style={styles.errorText}>{errors.phoneNumber}</Text>
+      )}
 
       <Button title='회원가입' onPress={handleRegister} />
 
@@ -123,8 +140,14 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 15,
+    marginBottom: 10,
     backgroundColor: '#fff',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 5,
+    marginLeft: 5,
   },
   link: {
     color: '#007BFF',
