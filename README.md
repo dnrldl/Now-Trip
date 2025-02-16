@@ -246,8 +246,10 @@ public List<ExchangeListResponse> getExchangeRateList() {
         nativeQuery = true)
 List<Object[]> findTopChangedRates();
 ```
+
 ✅ 그 결과, 쿼리 수를 4개 -> 1개로 줄였고, 평균 응답 시간이 **약 200ms로 성능 60% 향상**  
 ✅ 이처럼 복잡한 작업이 있는 경우엔 JPA만이 아닌 다른 방법을 찾는게 생산적 (JPQL, 네이티브 SQL 등등)
+
 ---
 
 ### 이미지 업로드
