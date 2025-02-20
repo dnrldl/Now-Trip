@@ -1,13 +1,18 @@
 package com.nowtrip.api.security.jwt;
 
 import com.nowtrip.api.enums.Role;
-
+import com.nowtrip.api.security.CustomUserDetails;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -20,23 +25,23 @@ public class JwtProvider {
     private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60 * 24; // 24시간
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7; // 일주일
 
-    public String generateAccessToken(String username, Long userId, Role role) {
-        return generateToken(username, userId, role, ACCESS_TOKEN_VALIDITY);
+    public String generateAccessToken(Authentication auth) {
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        String username = principal.getUsername();
+        Long userId = principal.getUserId();
+
+        return generateToken(username, userId, Role.USER, ACCESS_TOKEN_VALIDITY);
     }
 
-    public String generateRefreshToken(String username, Long userId) {
+    public String generateRefreshToken(Authentication auth) {
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        String username = principal.getUsername();
+        Long userId = principal.getUserId();
+
         return generateToken(username, userId, null, REFRESH_TOKEN_VALIDITY);
     }
 
-    // 리프레시 토큰을 사용해서 새로운 엑세스 토큰 발급
-    public String refreshAccessToken(String refreshToken, String username, Long userId, Role role) {
-        if (validateToken(refreshToken)) {
-            return generateAccessToken(username, userId, role);
-        }
-        throw new JwtException("토큰이 유효하지 않습니다");
-    }
-
-    public String generateToken(String username, Long userId, Role role, long validity) {
+    private String generateToken(String username, Long userId, Role role, long validity) {
         Claims claims = Jwts.claims();
         claims.put("sub", username);
         claims.put("userId", userId);
@@ -70,11 +75,15 @@ public class JwtProvider {
 
     // 토큰에서 사용자 정보 추출
     public Claims extractClaims(String token) {
-        return  Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException ex) {
+            return ex.getClaims();
+        }
     }
 
     public boolean validateToken(String token) {

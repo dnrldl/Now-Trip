@@ -33,7 +33,7 @@ public class AuthController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> request) {
-        String newAccessToken = authService.refreshAccessToken(request.get("refreshToken"));
+        String newAccessToken = authService.refreshAccessToken(request.get("refreshToken"), request.get("accessToken"));
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
