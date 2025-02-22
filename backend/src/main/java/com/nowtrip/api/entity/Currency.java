@@ -34,6 +34,7 @@ public class Currency {
     private String currencyFlagCode; // jp
 
     @OneToMany(mappedBy = "currency")
+    @Builder.Default
     private List<Country> countries = new ArrayList<>();
 
 }

@@ -15,7 +15,6 @@ const FlagImage = ({ countryCode, style }) => {
 
       if (fileInfo.exists) {
         setLocalUri(localFilePath);
-        console.log('캐시된 이미지 파일 사용');
         return;
       }
 

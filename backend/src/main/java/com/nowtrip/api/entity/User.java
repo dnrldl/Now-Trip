@@ -28,8 +28,14 @@ public class User extends Auditable{
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(nullable = false)
+    @Column
     private String phoneNumber;
+
+    @Column
+    private String profile;
+
+    @Column(nullable = false)
+    private boolean isSocial = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -38,6 +38,7 @@ public class Post extends Auditable {
     private int viewCount;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Like> likes = new ArrayList<>();
 
 }

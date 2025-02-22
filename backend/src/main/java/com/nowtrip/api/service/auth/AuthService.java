@@ -2,7 +2,7 @@ package com.nowtrip.api.service.auth;
 
 import com.nowtrip.api.request.UserLoginRequest;
 import com.nowtrip.api.response.user.UserLoginResponse;
-import com.nowtrip.api.security.CustomUserDetails;
+import com.nowtrip.api.security.PrincipalDetails;
 import com.nowtrip.api.security.jwt.JwtProvider;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -32,7 +32,7 @@ public class AuthService {
         String password = request.getPassword();
         try {
             Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-            Long userId = ((CustomUserDetails) auth.getPrincipal()).getUserId();
+            Long userId = ((PrincipalDetails) auth.getPrincipal()).getUserId();
 
             String accessToken = jwtProvider.generateAccessToken(auth);
             String refreshToken = jwtProvider.generateRefreshToken(auth);

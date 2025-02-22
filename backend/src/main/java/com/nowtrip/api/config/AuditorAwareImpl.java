@@ -1,10 +1,9 @@
 package com.nowtrip.api.config;
 
-import com.nowtrip.api.security.CustomUserDetails;
+import com.nowtrip.api.security.PrincipalDetails;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
 
@@ -20,7 +19,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
         }
 
         // principal이 CustomUserDetails인 경우
-        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+        if (authentication.getPrincipal() instanceof PrincipalDetails customUserDetails) {
             // 닉네임을 반환하
             return Optional.of(customUserDetails.getNickname());
         }

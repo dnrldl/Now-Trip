@@ -42,9 +42,7 @@ public class UserService {
 
     public UserInfoResponse getUserInfo() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> {
-            throw new UserNotFoundException("유저를 찾을 수 없습니다");
-        });
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
 
         UserInfoResponse userInfo = UserInfoResponse.builder()
                 .email(user.getEmail())

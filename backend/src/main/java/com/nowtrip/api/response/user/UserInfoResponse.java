@@ -17,6 +17,7 @@ public class UserInfoResponse {
     private String name;
     private String nickname;
     private String phoneNumber;
+    private String profile;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Role role;

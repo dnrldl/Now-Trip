@@ -144,6 +144,7 @@ export const AuthProvider = ({ children }) => {
         refreshAccessToken,
         updateAuthState,
         loadTokens,
+        setTokens,
       }}
     >
       {children}

@@ -28,6 +28,7 @@ export default function HomeScreen() {
   }, []);
 
   const initExchangeList = async () => {
+    setError(null);
     setLoading(true);
     setRefreshing(false);
     try {
@@ -67,7 +68,13 @@ export default function HomeScreen() {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>오류가 발생했습니다: {error}</Text>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          onPress={initExchangeList}
+          style={styles.refreshButton}
+        >
+          <Text style={styles.refreshText}>새로 고침</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -183,7 +190,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    color: 'red',
     fontSize: 16,
     textAlign: 'center',
   },
@@ -248,5 +254,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  refreshButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  refreshText: {
+    color: '#007bff',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
 });

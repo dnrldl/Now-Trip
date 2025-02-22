@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping("/")
 public class TestContorller {
     @GetMapping
     public String test() {
-        return "asdsda";
+        return "welcome";
     }
 }

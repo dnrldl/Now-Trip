@@ -1,7 +1,7 @@
 package com.nowtrip.api.security.jwt;
 
 import com.nowtrip.api.enums.Role;
-import com.nowtrip.api.security.CustomUserDetails;
+import com.nowtrip.api.security.PrincipalDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -9,10 +9,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -26,18 +23,16 @@ public class JwtProvider {
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7; // 일주일
 
     public String generateAccessToken(Authentication auth) {
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        String username = principal.getUsername();
+        PrincipalDetails principal = (PrincipalDetails) auth.getPrincipal();
+        String username = principal.getUsername(); // 이메일
         Long userId = principal.getUserId();
-
         return generateToken(username, userId, Role.USER, ACCESS_TOKEN_VALIDITY);
     }
 
     public String generateRefreshToken(Authentication auth) {
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        PrincipalDetails principal = (PrincipalDetails) auth.getPrincipal();
         String username = principal.getUsername();
         Long userId = principal.getUserId();
-
         return generateToken(username, userId, null, REFRESH_TOKEN_VALIDITY);
     }
 

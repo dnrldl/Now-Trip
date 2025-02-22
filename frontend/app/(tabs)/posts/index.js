@@ -103,7 +103,7 @@ export default function PostsScreen() {
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity onPress={initPosts} style={styles.refreshButton}>
-          <Text>새로 고침</Text>
+          <Text style={styles.refreshText}>새로 고침</Text>
         </TouchableOpacity>
       </View>
     );
@@ -257,9 +257,12 @@ const styles = StyleSheet.create({
   },
 
   refreshButton: {
-    backgroundColor: '#007BFF',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+  },
+  refreshText: {
+    color: '#007bff',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
 });
