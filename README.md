@@ -52,7 +52,7 @@
 ### 🔧 Backend (Spring Boot)
 - **Spring Boot 3**: API 서버 개발
 - **Spring Data JPA**: 데이터베이스 ORM
-- **Spring Security + JWT**: 인증 및 보안
+- **Spring Security + JWT + OAuth2**: 인증 및 보안
 - **MySQL**: 데이터 저장 및 관리
 - **Redis**: 캐싱 및 세션 관리
 
