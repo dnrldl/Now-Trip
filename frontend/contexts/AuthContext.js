@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { saveToken, getToken, deleteToken } from '../utils/secureStore';
 import { loginRequest, logoutRequest, validateToken } from '../api/authApi';
 import { Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { publicAxios } from '../api/axiosInstance';
 
 const AuthContext = createContext();
@@ -16,7 +15,6 @@ export const AuthProvider = ({ children }) => {
     refreshToken: null,
     isAuthenticated: false,
   });
-  const router = useRouter();
 
   const login = async (userData) => {
     try {
@@ -24,6 +22,7 @@ export const AuthProvider = ({ children }) => {
       const { accessToken, refreshToken } = response;
 
       await setTokens(accessToken, refreshToken);
+      console.log('로그인 성공');
     } catch (error) {
       console.error('로그인 실패:', error.response?.data || error.message);
       throw error;
@@ -32,7 +31,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const response = await logoutRequest();
+      const response = logoutRequest();
       await deleteTokens();
       Alert.alert(response.message);
     } catch (error) {
@@ -50,7 +49,6 @@ export const AuthProvider = ({ children }) => {
       refreshToken,
       isAuthenticated: true,
     });
-    console.log('로그인 성공');
   };
 
   // 토큰들 삭제
@@ -94,11 +92,7 @@ export const AuthProvider = ({ children }) => {
       // 토큰 만료시
       console.log('토큰이 유효하지 않습니다.');
       await deleteTokens();
-      Alert.alert('세션 만료', '다시 로그인이 필요합니다.', [
-        {
-          text: '확인',
-        },
-      ]);
+      Alert.alert('세션 만료', '다시 로그인이 필요합니다.');
     }
   };
 
@@ -144,6 +138,7 @@ export const AuthProvider = ({ children }) => {
         refreshAccessToken,
         updateAuthState,
         loadTokens,
+        deleteTokens,
         setTokens,
       }}
     >

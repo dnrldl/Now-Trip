@@ -15,7 +15,7 @@ export default function MyPageScreen() {
   const [userInfo, setUserInfo] = useState(null); // 사용자 정보 저장
   const [loading, setLoading] = useState(true); // 로딩 상태 초기값: false
   const [error, setError] = useState(null);
-  const { authState, logout } = useAuth();
+  const { authState, deleteTokens } = useAuth();
   const router = useRouter();
 
   const getUserInfo = async () => {
@@ -125,7 +125,8 @@ export default function MyPageScreen() {
           <TouchableOpacity
             style={styles.logoutButton}
             onPress={async () => {
-              await logout();
+              await deleteTokens();
+              Alert.alert('로그아웃', '로그아웃 되었습니다.');
               router.replace('/');
             }}
           >

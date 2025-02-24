@@ -2,10 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { toggleLike } from '../api/postApi';
+import { useAuth } from '../contexts/AuthContext';
 
-export default function PostAction({ post, authState }) {
+export default function PostAction({ post }) {
   const [likeCount, setLikeCount] = useState(post.likeCount); // 좋아요 수 상태
   const [isLiked, setIsLiked] = useState(post.liked); // 좋아요 여부 상태
+  const { authState } = useAuth();
 
   const handleLikePress = async () => {
     if (!authState?.isAuthenticated) {

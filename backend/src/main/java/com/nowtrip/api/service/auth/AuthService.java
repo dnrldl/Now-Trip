@@ -49,30 +49,23 @@ public class AuthService {
     }
 
     public void logout(String accessToken) {
-        try {
-            String userId = jwtProvider.extractUserId(accessToken).toString();
-            Long expiration = jwtProvider.extractExpiration(accessToken);
-            long ttl = expiration - System.currentTimeMillis();
+        System.out.println("accessToken = " + accessToken);
+        String userId = jwtProvider.extractUserId(accessToken).toString();
+        Long expiration = jwtProvider.extractExpiration(accessToken);
+        long ttl = expiration - System.currentTimeMillis();
 
-            // 만료시간이 남아있다면 redis에 Access Token을 블랙리스트로 등록
-            // blacklist:<accessToken> : <userId> TTl: <expiration>
-            if (ttl > 0) {
-                redisTemplate.opsForValue().set(
-                        "blacklist:" + accessToken, userId, ttl, TimeUnit.MILLISECONDS
-                );
-            }
+        // 만료시간이 남아있다면 redis에 Access Token을 블랙리스트로 등록
+        // blacklist:<accessToken> : <userId> TTl: <expiration>
+        if (ttl > 0) {
+            redisTemplate.opsForValue().set(
+                    "blacklist:" + accessToken, userId, ttl, TimeUnit.MILLISECONDS
+            );
+        }
 
-            // redis에서 Refresh Token 삭제
-            String refreshTokenKey = "refreshToken:" + userId;
-            if (Boolean.TRUE.equals(redisTemplate.hasKey(refreshTokenKey))) {
-                redisTemplate.delete(refreshTokenKey);
-            }
-
-        } catch (ExpiredJwtException ex) {
-            // 토큰이 만료된 경우 로그아웃
-            System.out.println("만료된 토큰으로 로그아웃 요청: " + accessToken);
-        } catch (Exception ex) {
-            throw new RuntimeException("로그아웃 처리 중 오류가 발생했습니다.", ex);
+        // redis에서 Refresh Token 삭제
+        String refreshTokenKey = "refreshToken:" + userId;
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(refreshTokenKey))) {
+            redisTemplate.delete(refreshTokenKey);
         }
     }
 
