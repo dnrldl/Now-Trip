@@ -6,7 +6,7 @@ import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 
-const BACKEND_OAUTH_URL = 'http://localhost:8080/oauth2/authorization/google';
+const BACKEND_OAUTH_URL = 'http://localhost:8080/oauth2/authorization/';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -33,8 +33,11 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const authUrl = `${BACKEND_OAUTH_URL}?redirect_uri=${redirectUri}`;
+  const handleSocialLogin = async (platform) => {
+    console.log(platform + ' 로그인 실행');
+    const authUrl = `${
+      BACKEND_OAUTH_URL + platform
+    }?redirect_uri=${redirectUri}`;
 
     try {
       const result = await WebBrowser.openAuthSessionAsync(
@@ -48,6 +51,7 @@ export default function LoginScreen() {
         const refreshToken = queryParams.refreshToken;
 
         await setTokens(accessToken, refreshToken);
+        console.log(platform + ' 소셜 로그인 성공');
 
         router.push('/');
       }
@@ -76,7 +80,14 @@ export default function LoginScreen() {
         autoCapitalize='none'
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
-      <Button title='구글 계정으로 로그인' onPress={handleGoogleLogin} />
+      <Button
+        title='구글 계정으로 로그인'
+        onPress={() => handleSocialLogin('google')}
+      />
+      <Button
+        title='네이버 계정으로 로그인'
+        onPress={() => handleSocialLogin('naver')}
+      />
       <Button title='로그인' onPress={handleLogin} />
       <Button title='회원가입' onPress={() => router.replace('/register')} />
     </View>

@@ -58,7 +58,10 @@ export default function AddPostScreen() {
         setUploading(true);
 
         const fileName = image.split('/').pop(); // test.jpg
-        const { presignedUrl, fileUrl } = await getPresignedUrl(fileName);
+        const { presignedUrl, fileUrl } = await getPresignedUrl(
+          fileName,
+          'uploads/'
+        );
 
         const a = await fetch(image);
         const blob = await a.blob();

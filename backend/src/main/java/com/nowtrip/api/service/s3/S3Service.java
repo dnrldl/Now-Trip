@@ -26,7 +26,7 @@ public class S3Service {
     @Value("${cloudfront.domain}")
     private String cloudFrontDomain;
 
-    public Map<String, String> generatePresignedUrl(String originalFileName) {
+    public Map<String, String> generatePresignedUrl(String originalFileName, String path) {
         String fileExtension = "";
         if (originalFileName.contains(".")) {
             fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
@@ -41,7 +41,7 @@ public class S3Service {
 
         // 요청 생성
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucketName, "uploads/" + newFileName) // 경로(파일이름)
+                new GeneratePresignedUrlRequest(bucketName, path + newFileName) // 경로(파일이름)
                         .withMethod(HttpMethod.PUT)
                         .withContentType(contentType)
                         .withExpiration(expiration);

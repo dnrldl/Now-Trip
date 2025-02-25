@@ -17,7 +17,7 @@ public class S3Controller {
 
     @PostMapping("/presigned-url")
     public ResponseEntity<Map<String, String>> getPresignedUrl(@RequestBody Map<String, String> request) {
-        Map<String, String> response = s3Service.generatePresignedUrl(request.get("fileName"));
+        Map<String, String> response = s3Service.generatePresignedUrl(request.get("fileName"), request.get("path"));
         return ResponseEntity.ok(response);
     }
 }

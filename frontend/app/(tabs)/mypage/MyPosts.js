@@ -7,45 +7,37 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { fetchPrivatePosts, fetchPublicPosts } from '../../../api/postApi';
+import { fetchMyPosts } from '../../../api/postApi';
 import { useAuth } from '../../../contexts/AuthContext';
+import DateInfo from '../../../components/DateInfo';
 import PostItem from '../../../components/PostItem';
 
-export default function PostsScreen() {
+export default function MyPosts() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLast, setIsLast] = useState(false);
+  const [showUpBtn, setShowUpBtn] = useState(false);
   const flatListRef = useRef(null);
-  const { authState, loadTokens } = useAuth();
   const router = useRouter();
-
-  let fetchPosts = authState.isAuthenticated
-    ? fetchPrivatePosts
-    : fetchPublicPosts;
-
-  useEffect(() => {
-    loadTokens();
-    initPosts();
-  }, []);
+  const { authState } = useAuth();
 
   const initPosts = async () => {
     setError(null);
     setLoading(true);
     setRefreshing(false);
     try {
-      const response = await fetchPosts(0);
-      setPosts(response.content);
+      const data = await fetchMyPosts(0);
+      setPosts(data.content);
       setIsLast(false);
       setPage(0);
     } catch (err) {
-      setError('게시글을 불러오는 중 문제가 발생했습니다.');
-      console.error(err);
+      console.error('게시글을 불러오는 중 오류 발생:', err);
     } finally {
       setLoading(false);
     }
@@ -56,12 +48,21 @@ export default function PostsScreen() {
     try {
       const nextPage = page + 1;
       setPage(nextPage);
-      const data = await fetchPosts(nextPage);
+      const data = await fetchMyPosts(nextPage);
       if (nextPage === data.page.totalPages - 1) setIsLast(true);
       setPosts((prev) => [...prev, ...data.content]);
     } catch (err) {
       console.error(err);
     }
+  };
+
+  useEffect(() => {
+    initPosts();
+  }, []);
+
+  const handleScroll = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowUpBtn(offsetY > 200);
   };
 
   const onRefresh = async () => {
@@ -71,17 +72,6 @@ export default function PostsScreen() {
     } finally {
       setRefreshing(false);
     }
-  };
-
-  const clickToAddPost = async () => {
-    loadTokens();
-    if (!authState.isAuthenticated) {
-      Alert.alert('로그인 필요!', '로그인 후 이용해주세요.', [
-        { text: '확인' },
-      ]);
-      return;
-    }
-    router.push('/posts/addPost');
   };
 
   if (loading) {
@@ -106,15 +96,6 @@ export default function PostsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <Text style={styles.title}>게시판</Text>
-        <TouchableOpacity style={styles.addButton} onPress={clickToAddPost}>
-          <Text style={styles.addButtonText}>+ 작성</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 게시글 목록 */}
       <FlatList
         ref={flatListRef}
         data={posts}
@@ -126,43 +107,83 @@ export default function PostsScreen() {
         onEndReachedThreshold={0.7}
         onEndReached={handleLoadMore}
       />
+
+      {/* 맨 위로 버튼 */}
+      {showUpBtn && (
+        <TouchableOpacity
+          style={styles.upBtn}
+          onPress={() =>
+            flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
+          }
+        >
+          <Text style={styles.upBtnText}>▲ 맨 위로</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
   },
-  title: { fontSize: 22, fontWeight: 'bold' },
-  addButton: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+  postContainer: {
+    backgroundColor: '#fff',
     borderRadius: 8,
+    padding: 15,
+    marginBottom: 10,
+    elevation: 2,
   },
-  addButtonText: { color: '#fff', fontWeight: 'bold' },
-
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  date: {
+    fontSize: 12,
+    color: '#888',
+  },
+  postContent: {
+    fontSize: 16,
+    color: '#333',
+    marginTop: 5,
+  },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  refreshButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+  noDataText: {
+    fontSize: 16,
+    color: '#777',
   },
-  refreshText: {
-    color: '#007bff',
+  upBtn: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 50,
+    elevation: 5,
+  },
+  upBtnText: {
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 15,
+    textAlign: 'center',
   },
 });

@@ -48,7 +48,7 @@ public class PostService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Post> posts = postRepository.findAllWithoutCommentsByNickname(nickname, pageable);
 
-        return posts.map(this::convertToPostResponse);
+        return convertPostsToPostResponses(posts);
     }
 
     // 게시글 조회 (단일)

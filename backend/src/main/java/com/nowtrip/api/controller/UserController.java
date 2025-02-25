@@ -1,6 +1,7 @@
 package com.nowtrip.api.controller;
 
 
+import com.nowtrip.api.request.UserProfileRequest;
 import com.nowtrip.api.request.UserPwUpdateRequest;
 import com.nowtrip.api.request.UserRegistRequest;
 import com.nowtrip.api.request.UserNickNameUpdateRequest;
@@ -24,10 +25,11 @@ public class UserController {
         return new ResponseEntity<>("회원가입 완료", HttpStatus.CREATED);
     }
 
-    @PutMapping("/nickname")
-    public ResponseEntity<String> updateUserNickname(@RequestBody @Valid UserNickNameUpdateRequest request) {
-        userService.updateUserNickname(request);
-        return new ResponseEntity<>("닉네임 변경 완료", HttpStatus.OK);
+    @PutMapping("/profile")
+    public ResponseEntity<String> updateUserNickname(@RequestBody @Valid UserProfileRequest request) {
+        System.out.println("request.getNickname() = " + request.getNickname());
+        userService.updateProfile(request);
+        return new ResponseEntity<>("프로필 변경 완료", HttpStatus.OK);
     }
 
     @PutMapping("/password")

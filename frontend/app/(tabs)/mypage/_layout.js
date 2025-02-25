@@ -17,6 +17,14 @@ export default function MyPageLayout() {
           headerBackButtonDisplayMode: 'minimal',
         }}
       />
+      <Stack.Screen
+        name='edit-profile'
+        options={{
+          title: '프로필 편집',
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

@@ -3,6 +3,7 @@ package com.nowtrip.api.service.user;
 
 import com.nowtrip.api.entity.User;
 import com.nowtrip.api.exception.UserNotFoundException;
+import com.nowtrip.api.request.UserProfileRequest;
 import com.nowtrip.api.request.UserPwUpdateRequest;
 import com.nowtrip.api.request.UserRegistRequest;
 import com.nowtrip.api.request.UserNickNameUpdateRequest;
@@ -10,7 +11,9 @@ import com.nowtrip.api.response.user.UserInfoResponse;
 import com.nowtrip.api.enums.Role;
 import com.nowtrip.api.exception.DuplicateException;
 import com.nowtrip.api.repository.UserRepository;
+import com.nowtrip.api.security.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,7 +51,7 @@ public class UserService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
 
-        UserInfoResponse userInfo = UserInfoResponse.builder()
+        return UserInfoResponse.builder()
                 .email(user.getEmail())
                 .name(user.getName())
                 .nickname(user.getNickname())
@@ -57,23 +60,31 @@ public class UserService {
                 .updatedAt(user.getUpdatedAt())
                 .role(user.getRole())
                 .build();
-
-        return userInfo;
     }
 
-    public void updateUserNickname(UserNickNameUpdateRequest request) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
-
-        user.setNickname(request.getNickname());
-        userRepository.save(user);
-    }
+//    public void updateUserNickname(UserNickNameUpdateRequest request) {
+//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+//        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
+//
+//        user.setNickname(request.getNickname());
+//        userRepository.save(user);
+//    }
 
     public void updateUserPassword(UserPwUpdateRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+    }
+
+    public void updateProfile(UserProfileRequest request) {
+        System.out.println("request.getProfile() = " + request.getProfile());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
+
+        user.setNickname(request.getNickname());
+        user.setProfile(request.getProfile());
         userRepository.save(user);
     }
 
