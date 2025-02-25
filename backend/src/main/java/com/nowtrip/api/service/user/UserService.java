@@ -22,12 +22,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public void registerUser(UserRegistRequest request) {
-        if (userRepository.existsByEmail(request.getEmail()))
-            throw new DuplicateException("이미 사용 중인 이메일입니다.");
-        if (userRepository.existsByNickname(request.getNickname()))
-            throw new DuplicateException("닉네임이 이미 사용 중입니다.");
-        if (userRepository.existsByPhoneNumber(request.getPhoneNumber()))
-            throw new DuplicateException("전화번호가 이미 사용 중입니다.");
+        validateRegisterRequest(request);
 
         User user = User.builder()
                 .email(request.getEmail())
@@ -38,6 +33,15 @@ public class UserService {
                 .role(Role.USER)
                 .build();
         userRepository.save(user);
+    }
+
+    private void validateRegisterRequest(UserRegistRequest request) {
+        if (userRepository.existsByEmail(request.getEmail()))
+            throw new DuplicateException("이미 사용 중인 이메일입니다.");
+        if (userRepository.existsByNickname(request.getNickname()))
+            throw new DuplicateException("닉네임이 이미 사용 중입니다.");
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber()))
+            throw new DuplicateException("전화번호가 이미 사용 중입니다.");
     }
 
     public UserInfoResponse getUserInfo() {
