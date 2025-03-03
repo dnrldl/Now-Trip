@@ -32,6 +32,7 @@ export default function PostDetails() {
 
       const commentsRes = await fetchComments(postId);
       setComments(commentsRes);
+      console.log(comments);
       console.log('게시글 상세, 댓글 로드 완료');
     } catch (err) {
       console.warn(err);

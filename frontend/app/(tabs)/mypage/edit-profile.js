@@ -36,11 +36,6 @@ export default function EditProfileScreen() {
   };
 
   const handleSave = async () => {
-    if (!nickname) {
-      Alert.alert('입력 오류', '닉네임을 입력해주세요.');
-      return;
-    }
-
     let uploadedImageUrl = null;
 
     try {

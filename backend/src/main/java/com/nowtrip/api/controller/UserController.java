@@ -26,8 +26,7 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<String> updateUserNickname(@RequestBody @Valid UserProfileRequest request) {
-        System.out.println("request.getNickname() = " + request.getNickname());
+    public ResponseEntity<String> updateProfile(@RequestBody @Valid UserProfileRequest request) {
         userService.updateProfile(request);
         return new ResponseEntity<>("프로필 변경 완료", HttpStatus.OK);
     }

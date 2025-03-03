@@ -56,19 +56,12 @@ public class UserService {
                 .name(user.getName())
                 .nickname(user.getNickname())
                 .phoneNumber(user.getPhoneNumber())
+                .profile(user.getProfile())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .role(user.getRole())
                 .build();
     }
-
-//    public void updateUserNickname(UserNickNameUpdateRequest request) {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
-//
-//        user.setNickname(request.getNickname());
-//        userRepository.save(user);
-//    }
 
     public void updateUserPassword(UserPwUpdateRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -79,12 +72,14 @@ public class UserService {
     }
 
     public void updateProfile(UserProfileRequest request) {
-        System.out.println("request.getProfile() = " + request.getProfile());
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
 
-        user.setNickname(request.getNickname());
-        user.setProfile(request.getProfile());
+        if (request.getNickname() != null)
+            user.setNickname(request.getNickname());
+        if (request.getProfile() != null)
+            user.setProfile(request.getProfile());
+
         userRepository.save(user);
     }
 

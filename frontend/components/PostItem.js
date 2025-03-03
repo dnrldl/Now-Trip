@@ -23,7 +23,7 @@ const PostItem = ({ item, router }) => {
     <TouchableOpacity
       style={styles.postContainer}
       onPress={() =>
-        router.push({ pathname: '/post/details', params: { postId: item.id } })
+        router.push({ pathname: '/posts/details', params: { postId: item.id } })
       }
     >
       {/* 작성자 정보 */}

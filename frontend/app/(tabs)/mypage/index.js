@@ -23,6 +23,7 @@ export default function MyPageScreen() {
   const router = useRouter();
 
   const initUserInfo = async () => {
+    setError(null);
     try {
       const data = await fetchUserInfo();
       console.log('사용자 정보 로드 완료');
@@ -47,7 +48,9 @@ export default function MyPageScreen() {
       ]);
       return;
     }
+
     initUserInfo();
+    console.log(userInfo);
   }, []);
 
   // 비로그인 상태 처리
@@ -104,9 +107,7 @@ export default function MyPageScreen() {
       {/* 상단 프로필 영역 */}
       <View style={styles.profileSection}>
         <Image
-          source={{
-            uri: userInfo?.profileImage || 'https://via.placeholder.com/100',
-          }}
+          source={{ uri: userInfo?.profile }}
           style={styles.profileImage}
         />
         <View style={styles.userInfo}>
@@ -224,6 +225,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     marginRight: 15,
+    resizeMode: 'cover',
   },
   userInfo: {
     flex: 1,
