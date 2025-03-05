@@ -7,9 +7,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
-public class AuditorAwareImpl implements AuditorAware<String> {
+public class AuditorAwareImpl implements AuditorAware<Long> {
     @Override
-    public Optional<String> getCurrentAuditor() {
+    public Optional<Long> getCurrentAuditor() {
         // 현재 SecurityContextHolder에서 인증정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -20,8 +20,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
 
         // principal이 CustomUserDetails인 경우
         if (authentication.getPrincipal() instanceof PrincipalDetails customUserDetails) {
-            // 닉네임을 반환하
-            return Optional.of(customUserDetails.getNickname());
+            return Optional.ofNullable(customUserDetails.getUserId());
         }
 
         // 그 외 empty 반환

@@ -20,6 +20,7 @@ export default function EditProfileScreen() {
   const [profileImage, setProfileImage] = useState(null);
   const [imageType, setImageType] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(null);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -70,6 +71,7 @@ export default function EditProfileScreen() {
       router.back();
     } catch (error) {
       Alert.alert('오류 발생', '프로필 업데이트 중 문제가 발생했습니다.');
+      setError(error.details.nickname);
       console.log(error);
     } finally {
       setUploading(false);
@@ -116,6 +118,7 @@ export default function EditProfileScreen() {
           onChangeText={setNickname}
           autoCapitalize='none'
         />
+        {error && <Text style={styles.errorText}>{error}</Text>}
       </View>
     </View>
   );
@@ -185,5 +188,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     paddingVertical: 5,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+
+    marginTop: 5,
   },
 });

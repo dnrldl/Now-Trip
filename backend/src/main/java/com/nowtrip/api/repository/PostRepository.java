@@ -8,15 +8,16 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Page<Post> findByCountryIso2Code(String iso2Code, Pageable pageable);
+    @Query(value = "SELECT p FROM Post p WHERE p.country.iso2Code = :iso2Code",
+            countQuery = "SELECT count(p) FROM Post p WHERE p.country.iso2Code = :iso2Code")
+    Page<Post> findByCountryIso2Code(@Param("iso2Code") String iso2Code, Pageable pageable);
+
     @Query("SELECT p FROM Post p ORDER BY p.createdAt DESC")
     Page<Post> findAllWithoutComments(Pageable pageable);
 
-    @Query("SELECT p FROM Post p WHERE p.createdBy = :nickname ORDER BY p.createdAt DESC")
-    Page<Post> findAllWithoutCommentsByNickname(@Param("nickname") String nickname, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.createdBy = :userId ORDER BY p.createdAt DESC")
+    Page<Post> findAllWithoutCommentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + :delta WHERE p.id = :postId")

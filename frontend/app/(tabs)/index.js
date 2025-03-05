@@ -1,12 +1,12 @@
 import React from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, View } from 'react-native';
 import ExchangeRateList from '../../components/ExchangeRateList';
 
 export default function HomeScreen() {
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <ExchangeRateList />
-    </ScrollView>
+    </View>
   );
 }
 

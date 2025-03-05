@@ -22,7 +22,7 @@ public class Post extends Auditable {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT") // 문자열 제한 x
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     private String imageUrl;
@@ -31,8 +31,6 @@ public class Post extends Auditable {
     @JoinColumn(name = "country_id")
     private Country country;
 
-    // 기본형(int) -> 0이 자동 할당, null 허용 X
-    // 래퍼 클래스(Integer) -> 기본값 X, null 허용
     private int likeCount;
     private int commentCount;
     private int viewCount;

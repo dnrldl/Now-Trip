@@ -4,6 +4,7 @@ import com.nowtrip.api.entity.Comment;
 import com.nowtrip.api.entity.Post;
 import com.nowtrip.api.repository.CommentRepository;
 import com.nowtrip.api.repository.PostRepository;
+import com.nowtrip.api.repository.UserRepository;
 import com.nowtrip.api.response.post.CommentResponse;
 import com.nowtrip.api.response.post.PostResponse;
 import com.nowtrip.api.service.auth.AuthenticationHelper;
@@ -20,7 +21,9 @@ import java.util.stream.Collectors;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final AuthenticationHelper authenticationHelper;
+
 
     public List<CommentResponse> getCommentsByPostId(Long postId) {
         List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
@@ -48,10 +51,10 @@ public class CommentService {
     public void updateComment(Long commentId, String content) {
         Comment savedComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다"));
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (!savedComment.getCreatedBy().equals(currentEmail))
+        if (!isCommentOwner(commentId)) {
             throw new SecurityException("댓글 변경 권한이 없습니다");
+        }
 
         savedComment.setContent(content);
         commentRepository.save(savedComment);
@@ -61,12 +64,11 @@ public class CommentService {
     public void deleteComment(Long commentId) {
         Comment savedComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다"));
-
         Post post = savedComment.getPost();
-        String currentEmail = authenticationHelper.getCurrentUser().getUsername();
 
-        if (!savedComment.getCreatedBy().equals(currentEmail))
+        if (!isCommentOwner(commentId)) {
             throw new SecurityException("댓글 삭제 권한이 없습니다");
+        }
 
         commentRepository.delete(savedComment);
         postRepository.decrementCommentCount(post.getId());
@@ -79,8 +81,21 @@ public class CommentService {
                 comment.getContent(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
-                comment.getCreatedBy(),
-                comment.getModifiedBy()
+                getLatestNickname(comment.getCreatedBy())
         );
+    }
+
+    private Long getCurrentUserId() {
+        return authenticationHelper.getCurrentUser().getUserId();
+    }
+
+    private String getLatestNickname(Long userId) {
+        return userRepository.findNicknameByUserId(userId).orElse("Unknown");
+    }
+
+    private boolean isCommentOwner(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다"));
+        return comment.getCreatedBy().equals(getCurrentUserId());
     }
 }

@@ -11,6 +11,5 @@ public class TestPostRunner implements CommandLineRunner {
     private final PostService postService;
     @Override
     public void run(String... args) throws Exception {
-        postService.generateTestData();
     }
 }
