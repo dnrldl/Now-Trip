@@ -7,19 +7,17 @@ import {
   TouchableOpacity,
   Alert,
   Image,
-  FlatList,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { fetchUserInfo } from '../../../api/userApi';
 import { useAuth } from '../../../contexts/AuthContext';
-import MyPosts from './MyPosts';
+import MyPageTabs from '../../../components/MyPageTabs';
 
 export default function MyPageScreen() {
   const [userInfo, setUserInfo] = useState(null); // 사용자 정보 저장
   const [loading, setLoading] = useState(true); // 로딩 상태 초기값: false
   const [error, setError] = useState(null);
   const { authState, deleteTokens } = useAuth();
-  const [selectedTab, setSelectedTab] = useState('posts');
   const router = useRouter();
 
   const initUserInfo = async () => {
@@ -48,9 +46,7 @@ export default function MyPageScreen() {
       ]);
       return;
     }
-
     initUserInfo();
-    console.log(userInfo);
   }, []);
 
   // 비로그인 상태 처리
@@ -125,7 +121,7 @@ export default function MyPageScreen() {
       </TouchableOpacity>
 
       {/* 탭 메뉴 */}
-      <View style={styles.tabContainer}>
+      {/* <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'posts' && styles.activeTab]}
           onPress={() => setSelectedTab('posts')}
@@ -152,42 +148,12 @@ export default function MyPageScreen() {
             내 댓글
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* 탭 내용 표시 */}
-      <MyPosts />
-      {/* {selectedTab === 'posts' ? (
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => `${item.id}`}
-          ListEmptyComponent={
-            <Text style={styles.noDataText}>게시글이 없습니다.</Text>
-          }
-          renderItem={({ item }) => (
-            <View style={styles.postItem}>
-              <Text style={styles.postTitle}>{item.title}</Text>
-              <Text style={styles.postContent} numberOfLines={2}>
-                {item.content}
-              </Text>
-            </View>
-          )}
-        />
-      ) : (
-        <FlatList
-          data={comments}
-          keyExtractor={(item) => `${item.id}`}
-          ListEmptyComponent={
-            <Text style={styles.noDataText}>댓글이 없습니다.</Text>
-          }
-          renderItem={({ item }) => (
-            <View style={styles.commentItem}>
-              <Text style={styles.commentContent} numberOfLines={2}>
-                {item.content}
-              </Text>
-            </View>
-          )}
-        />
-      )} */}
+      {/* <MyPosts /> */}
+
+      <MyPageTabs />
 
       {/* 로그아웃 버튼 */}
       <TouchableOpacity

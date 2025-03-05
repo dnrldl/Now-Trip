@@ -7,13 +7,10 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { fetchMyPosts } from '../../../api/postApi';
-import { useAuth } from '../../../contexts/AuthContext';
-import DateInfo from '../../../components/DateInfo';
-import PostItem from '../../../components/PostItem';
+import { fetchMyPosts } from '../api/postApi';
+import PostItem from './PostItem';
 
 export default function MyPosts() {
   const [posts, setPosts] = useState([]);
@@ -25,7 +22,6 @@ export default function MyPosts() {
   const [showUpBtn, setShowUpBtn] = useState(false);
   const flatListRef = useRef(null);
   const router = useRouter();
-  const { authState } = useAuth();
 
   const initPosts = async () => {
     setError(null);
