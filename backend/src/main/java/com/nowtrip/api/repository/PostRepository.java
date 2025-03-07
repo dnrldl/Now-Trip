@@ -34,4 +34,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Query("UPDATE Post p SET p.viewCount = p.viewCount + :views WHERE p.id = :postId")
     void updateViewCount(@Param("postId") Long postId, @Param("views") Integer views);
+
+    // User 정보를 한 번의 쿼리로 가져오기
+    @Query("SELECT p FROM Post p JOIN FETCH p.createdBy ORDER BY p.createdAt DESC")
+    Page<Post> findAllWithUser(Pageable pageable);
+
+    // 국가별 게시글 조회 시 User 정보 포함
+    @Query("SELECT p FROM Post p JOIN FETCH p.createdBy WHERE p.country.iso2Code = :iso2Code")
+    Page<Post> findByCountryWithUser(@Param("iso2Code") String iso2Code, Pageable pageable);
 }

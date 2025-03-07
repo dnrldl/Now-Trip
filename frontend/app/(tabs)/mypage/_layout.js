@@ -25,6 +25,14 @@ export default function MyPageLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name='details'
+        options={{
+          title: '게시글 상세',
+          headerShown: true,
+          headerBackButtonDisplayMode: 'minimal',
+        }}
+      />
     </Stack>
   );
 }

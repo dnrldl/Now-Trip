@@ -1,10 +1,10 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-export default function MyComments() {
+export default function MyFavorites() {
   return (
     <View>
-      <Text>MyComments</Text>
+      <Text>MyFavorites</Text>
     </View>
   );
 }

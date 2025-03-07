@@ -52,7 +52,7 @@ public class S3Service {
         Map<String, String> urls = new HashMap<>();
 
         urls.put("presignedUrl", presignedUrl.toString());
-        urls.put("fileUrl", cloudFrontDomain + "/uploads/" + newFileName);
+        urls.put("fileUrl", cloudFrontDomain + "/" + path + newFileName);
 
         return urls;
     }

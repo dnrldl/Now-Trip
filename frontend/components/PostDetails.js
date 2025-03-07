@@ -16,7 +16,6 @@ import PostAction from './PostAction';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function PostDetails() {
-  const router = useRouter();
   const { postId } = useLocalSearchParams();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -32,7 +31,6 @@ export default function PostDetails() {
 
       const commentsRes = await fetchComments(postId);
       setComments(commentsRes);
-      console.log(comments);
       console.log('게시글 상세, 댓글 로드 완료');
     } catch (err) {
       console.warn(err);

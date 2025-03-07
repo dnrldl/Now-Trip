@@ -3,6 +3,8 @@ package com.nowtrip.api.service.post;
 import com.nowtrip.api.entity.Country;
 import com.nowtrip.api.entity.Like;
 import com.nowtrip.api.entity.Post;
+import com.nowtrip.api.entity.User;
+import com.nowtrip.api.exception.UserNotFoundException;
 import com.nowtrip.api.repository.*;
 import com.nowtrip.api.request.PostRequest;
 import com.nowtrip.api.response.post.PostResponse;
@@ -141,6 +143,8 @@ public class PostService {
                 .map(Country::getName)
                 .orElse(UNKNOWN_COUNTRY);
 
+        User author = userRepository.findById(post.getCreatedBy()).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다."));
+
         return new PostResponse(
                 post.getId(),
                 post.getTitle(),
@@ -148,7 +152,8 @@ public class PostService {
                 post.getImageUrl(),
                 countryName,
                 post.getCreatedAt(),
-                getLatestNickname(post.getCreatedBy()), // 최신 닉네임 적용
+                author.getNickname(),
+                author.getProfile(),
                 post.getLikeCount(),
                 post.getCommentCount(),
                 post.getViewCount(),

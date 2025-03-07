@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MyPosts from './MyPosts';
-import MyComments from './MyComments';
+import MyFavorites from './MyFavorites';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -17,7 +17,7 @@ export default function MyPageTabs() {
       }}
     >
       <Tab.Screen name='내 게시글' component={MyPosts} />
-      <Tab.Screen name='내 댓글' component={MyComments} />
+      <Tab.Screen name='즐겨찾기' component={MyFavorites} />
     </Tab.Navigator>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Dimensions,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -10,32 +9,27 @@ import {
 import DateInfo from './DateInfo';
 import PostAction from './PostAction';
 import PostImage from './PostImage';
+import UserImage from './UserImage';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-// 개별 게시글
-const PostItem = ({ item, router }) => {
+const PostItem = ({ item, router, path }) => {
   const [showFullText, setShowFullText] = useState(false);
-
-  // 상세 페이지 이동
-
   return (
     <TouchableOpacity
       style={styles.postContainer}
       onPress={() =>
-        router.push({ pathname: '/posts/details', params: { postId: item.id } })
+        router.push({
+          pathname: '/' + path + '/details',
+          params: { postId: item.id },
+        })
       }
     >
       {/* 작성자 정보 */}
       <View style={styles.postHeader}>
-        <Image
-          source={{
-            uri: item.profile || require('../assets/images/favicon.png'),
-          }}
-          style={styles.profileImage}
-        />
+        <UserImage uri={item.authorProfileImage} size={40} />
         <View style={styles.userInfo}>
-          <Text style={styles.username}>{item.createdBy}</Text>
+          <Text style={styles.username}>{item.authorNickname}</Text>
           <Text style={styles.postDate}>
             <DateInfo createdAt={item.createdAt} />
           </Text>

@@ -119,12 +119,21 @@ export default function PostsScreen() {
         ref={flatListRef}
         data={posts}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <PostItem item={item} router={router} />}
+        renderItem={({ item }) => (
+          <PostItem item={item} router={router} path={'posts'} />
+        )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onEndReachedThreshold={0.7}
         onEndReached={handleLoadMore}
+        ListFooterComponent={
+          posts.length == 0 ? (
+            <Text style={styles.listFootText}>게시글이 없습니다.</Text>
+          ) : (
+            <Text style={styles.listFootText}>마지막 게시글입니다.</Text>
+          )
+        }
       />
     </View>
   );
@@ -164,5 +173,10 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontWeight: 'bold',
     fontSize: 15,
+  },
+  listFootText: {
+    textAlign: 'center',
+    paddingVertical: 10,
+    color: '#777',
   },
 });

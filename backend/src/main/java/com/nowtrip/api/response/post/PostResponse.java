@@ -19,7 +19,8 @@ public class PostResponse {
     private String imgUrl;
     private String country;
     private LocalDateTime createdAt;
-    private String createdBy;
+    private String authorNickname;
+    private String authorProfileImage;
     private Integer likeCount;
     private Integer commentCount;
     private Integer viewCount;

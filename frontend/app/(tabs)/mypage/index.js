@@ -6,12 +6,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
-  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { fetchUserInfo } from '../../../api/userApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import MyPageTabs from '../../../components/MyPageTabs';
+import UserImage from '../../../components/UserImage';
 
 export default function MyPageScreen() {
   const [userInfo, setUserInfo] = useState(null); // 사용자 정보 저장
@@ -102,10 +102,7 @@ export default function MyPageScreen() {
     <View style={styles.container}>
       {/* 상단 프로필 영역 */}
       <View style={styles.profileSection}>
-        <Image
-          source={{ uri: userInfo?.profile }}
-          style={styles.profileImage}
-        />
+        <UserImage uri={userInfo.profile} />
         <View style={styles.userInfo}>
           <Text style={styles.username}>{userInfo?.nickname || '사용자'}</Text>
           <Text style={styles.email}>{userInfo?.email}</Text>
@@ -119,39 +116,6 @@ export default function MyPageScreen() {
       >
         <Text style={styles.editProfileText}>프로필 편집</Text>
       </TouchableOpacity>
-
-      {/* 탭 메뉴 */}
-      {/* <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === 'posts' && styles.activeTab]}
-          onPress={() => setSelectedTab('posts')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === 'posts' && styles.activeTabText,
-            ]}
-          >
-            내 게시글
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === 'comments' && styles.activeTab]}
-          onPress={() => setSelectedTab('comments')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === 'comments' && styles.activeTabText,
-            ]}
-          >
-            내 댓글
-          </Text>
-        </TouchableOpacity>
-      </View> */}
-
-      {/* 탭 내용 표시 */}
-      {/* <MyPosts /> */}
 
       <MyPageTabs />
 
@@ -185,13 +149,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 15,
-    resizeMode: 'cover',
   },
   userInfo: {
     flex: 1,

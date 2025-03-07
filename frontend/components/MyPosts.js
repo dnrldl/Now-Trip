@@ -19,7 +19,6 @@ export default function MyPosts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLast, setIsLast] = useState(false);
-  const [showUpBtn, setShowUpBtn] = useState(false);
   const flatListRef = useRef(null);
   const router = useRouter();
 
@@ -56,11 +55,6 @@ export default function MyPosts() {
     initPosts();
   }, []);
 
-  const handleScroll = (event) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    setShowUpBtn(offsetY > 200);
-  };
-
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -96,25 +90,22 @@ export default function MyPosts() {
         ref={flatListRef}
         data={posts}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <PostItem item={item} router={router} />}
+        renderItem={({ item }) => (
+          <PostItem item={item} router={router} path={'mypage'} />
+        )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onEndReachedThreshold={0.7}
         onEndReached={handleLoadMore}
+        ListFooterComponent={
+          posts.length == 0 ? (
+            <Text style={styles.listFootText}>게시글이 없습니다.</Text>
+          ) : (
+            <Text style={styles.listFootText}>마지막 게시글입니다.</Text>
+          )
+        }
       />
-
-      {/* 맨 위로 버튼 */}
-      {showUpBtn && (
-        <TouchableOpacity
-          style={styles.upBtn}
-          onPress={() =>
-            flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
-          }
-        >
-          <Text style={styles.upBtnText}>▲ 맨 위로</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
@@ -122,7 +113,6 @@ export default function MyPosts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
   },
   postContainer: {
@@ -181,5 +171,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  listFootText: {
+    textAlign: 'center',
+    paddingVertical: 10,
+    color: '#777',
   },
 });

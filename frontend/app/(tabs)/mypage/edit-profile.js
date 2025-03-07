@@ -192,7 +192,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     fontSize: 14,
-
     marginTop: 5,
   },
 });
