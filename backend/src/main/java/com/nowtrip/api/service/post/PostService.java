@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -115,7 +114,7 @@ public class PostService {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
-            Long currentUserId = authenticationHelper.getCurrentUser().getUserId();
+            Long currentUserId = authenticationHelper.getCurrentPrincipal().getUserId();
             List<Like> likes = likeRepository.findByUserIdAndPostIdIn(currentUserId, postIds);
             likedPostIds = likes.stream().map(like -> like.getPost().getId()).collect(Collectors.toList());
         }
@@ -130,7 +129,7 @@ public class PostService {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
-            Long currentUserId = authenticationHelper.getCurrentUser().getUserId();
+            Long currentUserId = authenticationHelper.getCurrentPrincipal().getUserId();
             isLiked = likeRepository.existsByPostIdAndUserId(post.getId(), currentUserId);
         }
 
@@ -158,7 +157,7 @@ public class PostService {
     }
 
     private Long getCurrentUserId() {
-        return authenticationHelper.getCurrentUser().getUserId();
+        return authenticationHelper.getCurrentPrincipal().getUserId();
     }
 
     private String getLatestNickname(Long userId) {

@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class LikeService {
@@ -24,7 +22,7 @@ public class LikeService {
     public LikeResponse toggleLike(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-        Long userId = authenticationHelper.getCurrentUser().getUserId();
+        Long userId = authenticationHelper.getCurrentPrincipal().getUserId();
 
         // 좋아요 여부 확인
         int deletedRow = likeRepository.deleteByPostIdAndUserId(postId, userId);
@@ -46,7 +44,7 @@ public class LikeService {
     }
 
     public boolean isLiked(Long postId) {
-        Long userId = authenticationHelper.getCurrentUser().getUserId();
+        Long userId = authenticationHelper.getCurrentPrincipal().getUserId();
         return likeRepository.existsByPostIdAndUserId(postId, userId);
     }
 

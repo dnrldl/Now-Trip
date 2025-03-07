@@ -6,10 +6,8 @@ import com.nowtrip.api.repository.CommentRepository;
 import com.nowtrip.api.repository.PostRepository;
 import com.nowtrip.api.repository.UserRepository;
 import com.nowtrip.api.response.post.CommentResponse;
-import com.nowtrip.api.response.post.PostResponse;
 import com.nowtrip.api.service.auth.AuthenticationHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +50,7 @@ public class CommentService {
         Comment savedComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다"));
 
-        if (!isCommentOwner(commentId)) {
+        if (isNotMine(commentId)) {
             throw new SecurityException("댓글 변경 권한이 없습니다");
         }
 
@@ -66,7 +64,7 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다"));
         Post post = savedComment.getPost();
 
-        if (!isCommentOwner(commentId)) {
+        if (isNotMine(commentId)) {
             throw new SecurityException("댓글 삭제 권한이 없습니다");
         }
 
@@ -86,16 +84,16 @@ public class CommentService {
     }
 
     private Long getCurrentUserId() {
-        return authenticationHelper.getCurrentUser().getUserId();
+        return authenticationHelper.getCurrentPrincipal().getUserId();
     }
 
     private String getLatestNickname(Long userId) {
         return userRepository.findNicknameByUserId(userId).orElse("Unknown");
     }
 
-    private boolean isCommentOwner(Long commentId) {
+    private boolean isNotMine(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다"));
-        return comment.getCreatedBy().equals(getCurrentUserId());
+        return !comment.getCreatedBy().equals(getCurrentUserId());
     }
 }

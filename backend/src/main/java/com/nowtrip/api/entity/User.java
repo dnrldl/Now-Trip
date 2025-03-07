@@ -4,6 +4,9 @@ import com.nowtrip.api.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -40,6 +43,9 @@ public class User extends Auditable{
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoriteCurrency> favoriteCurrencies = new ArrayList<>();
 
     public User(Long userId) {
         this.id = userId;
