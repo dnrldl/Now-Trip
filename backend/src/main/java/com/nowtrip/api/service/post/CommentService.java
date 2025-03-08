@@ -3,11 +3,13 @@ package com.nowtrip.api.service.post;
 import com.nowtrip.api.entity.Comment;
 import com.nowtrip.api.entity.Post;
 import com.nowtrip.api.entity.User;
+import com.nowtrip.api.repository.CommentLikeRepository;
 import com.nowtrip.api.repository.CommentRepository;
 import com.nowtrip.api.repository.PostRepository;
 import com.nowtrip.api.response.post.CommentResponse;
 import com.nowtrip.api.service.auth.AuthenticationHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final AuthenticationHelper authenticationHelper;
 
 
@@ -73,13 +76,22 @@ public class CommentService {
     }
 
     private CommentResponse convertToCommentResponse(Comment comment, User user) {
+        boolean isLiked = false;
+
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
+            isLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), getCurrentUserId());
+        }
+
         return new CommentResponse(
                 comment.getId(),
                 comment.getPost().getId(),
                 comment.getContent(),
                 comment.getCreatedAt(),
                 user.getNickname(),
-                user.getProfile()
+                user.getProfile(),
+                comment.getLikeCount(),
+                isLiked
         );
     }
 

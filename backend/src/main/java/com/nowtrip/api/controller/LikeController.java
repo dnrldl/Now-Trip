@@ -9,20 +9,30 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class LikeController {
     private final LikeService likeService;
 
-    @PostMapping("/{postId}/like-toggle")
-    public ResponseEntity<LikeResponse> toggleLike(@PathVariable Long postId) {
-        LikeResponse response = likeService.toggleLike(postId);
+    @PostMapping("/posts/{postId}/like")
+    public ResponseEntity<LikeResponse> togglePostLike(@PathVariable Long postId) {
+        LikeResponse response = likeService.togglePostLike(postId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{postId}/likes/status")
-    public ResponseEntity<Map<String, Boolean>> getLikeStatus(@PathVariable Long postId) {
-        boolean isLiked = likeService.isLiked(postId);
-        return ResponseEntity.ok(Map.of("isLiked", isLiked));
+    @PostMapping("/comments/{commentId}/like")
+    public ResponseEntity<LikeResponse> toggleCommentLike(@PathVariable Long commentId) {
+        LikeResponse response = likeService.toggleCommentLike(commentId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/posts/{postId}/like")
+    public ResponseEntity<Boolean> isPostLiked(@PathVariable Long postId) {
+        return ResponseEntity.ok(likeService.isPostLiked(postId));
+    }
+
+    @GetMapping("/comments/{commentId}/like")
+    public ResponseEntity<Boolean> isCommentLiked(@PathVariable Long commentId) {
+        return ResponseEntity.ok(likeService.isCommentLiked(commentId));
     }
 }

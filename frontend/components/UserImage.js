@@ -14,7 +14,7 @@ export default function UserImage({ uri, size = 80 }) {
         borderRadius: 40,
         marginRight: 15,
         resizeMode: 'cover',
-        borderWidth: 1,
+        borderWidth: 0.5,
         borderColor: '#000',
       }}
     />

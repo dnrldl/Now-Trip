@@ -18,4 +18,6 @@ public class CommentResponse {
     private LocalDateTime createdAt;
     private String authorNickname;
     private String authorProfileImage;
+    private Integer likeCount;
+    private boolean isLiked;
 }

@@ -127,7 +127,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   postBox: {
-    marginBottom: 30,
+    marginBottom: 10,
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+    paddingBottom: 20,
   },
   header: {
     flexDirection: 'row',

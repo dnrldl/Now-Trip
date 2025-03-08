@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import DateInfo from './DateInfo';
 import UserImage from './UserImage';
+import CommentAction from './CommentAction';
 
 export default function CommentItem({ comment }) {
   return (
@@ -14,6 +15,7 @@ export default function CommentItem({ comment }) {
         </Text>
         <Text style={styles.text}>{comment.content}</Text>
       </View>
+      <CommentAction comment={comment} />
     </View>
   );
 }
@@ -22,6 +24,9 @@ const styles = StyleSheet.create({
   commentContainer: {
     flexDirection: 'row',
     marginBottom: 15,
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+    paddingBottom: 15,
   },
   profileImage: {
     width: 40,

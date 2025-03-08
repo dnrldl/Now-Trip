@@ -89,11 +89,18 @@ export const deletePost = async (postId) => {
   }
 };
 
-export const toggleLike = async (postId) => {
+export const togglePostLike = async (postId) => {
   try {
-    const response = await privateAxios.post(
-      PATH + '/' + postId + '/like-toggle'
-    );
+    const response = await privateAxios.post(PATH + '/' + postId + '/like');
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const toggleCommentLike = async (commentId) => {
+  try {
+    const response = await privateAxios.post('comments/' + commentId + '/like');
     return response.data;
   } catch (error) {
     handleError(error);

@@ -1,7 +1,7 @@
 package com.nowtrip.api.service.post;
 
 import com.nowtrip.api.entity.Country;
-import com.nowtrip.api.entity.Like;
+import com.nowtrip.api.entity.PostLike;
 import com.nowtrip.api.entity.Post;
 import com.nowtrip.api.entity.User;
 import com.nowtrip.api.exception.UserNotFoundException;
@@ -28,7 +28,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CountryRepository countryRepository;
-    private final LikeRepository likeRepository;
+    private final PostLikeRepository likeRepository;
     private final AuthenticationHelper authenticationHelper;
     private static final String UNKNOWN_COUNTRY = "Unknown Country";
 
@@ -117,7 +117,7 @@ public class PostService {
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
             Long currentUserId = authenticationHelper.getCurrentPrincipal().getUserId();
-            List<Like> likes = likeRepository.findByUserIdAndPostIdIn(currentUserId, postIds);
+            List<PostLike> likes = likeRepository.findByUserIdAndPostIdIn(currentUserId, postIds);
             likedPostIds = likes.stream().map(like -> like.getPost().getId()).collect(Collectors.toList());
         }
 

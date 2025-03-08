@@ -9,10 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "likes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"post_id", "user_id"})
+@Table(name = "post_likes", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"post_id", "user_id"}) // 중복 좋아요 방지
 })
-public class Like {
+public class PostLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
