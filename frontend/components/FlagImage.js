@@ -1,7 +1,6 @@
-import { View, Text, Image } from 'react-native';
+import { Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import * as FileSystem from 'expo-file-system';
-import { SvgUri } from 'react-native-svg';
 
 const FlagImage = ({ countryCode, style }) => {
   const [localUri, setLocalUri] = useState(null);

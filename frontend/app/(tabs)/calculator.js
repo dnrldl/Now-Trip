@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  ScrollView,
 } from 'react-native';
 import { useExchangeRates } from '../../contexts/ExchangeRateContext';
 import DropDownPicker from 'react-native-dropdown-picker';

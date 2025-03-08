@@ -10,14 +10,6 @@ export default function MyPageLayout() {
         }}
       />
       <Stack.Screen
-        name='my-posts'
-        options={{
-          headerShown: true,
-          title: '내 게시글',
-          headerBackButtonDisplayMode: 'minimal',
-        }}
-      />
-      <Stack.Screen
         name='edit-profile'
         options={{
           title: '프로필 편집',

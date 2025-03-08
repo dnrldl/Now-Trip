@@ -1,6 +1,5 @@
-import { Button } from 'react-native';
 import React from 'react';
-import { router, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 
 export default function PostsLayout() {
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import ExchangeRateList from '../../components/ExchangeRateList';
 
 export default function HomeScreen() {

@@ -52,7 +52,7 @@ public class PostService {
     public PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
-        return convertToPostResponse(post);
+        return convertPostToPostResponse(post);
     }
 
     // 국가 코드로 게시글 조회
@@ -126,7 +126,7 @@ public class PostService {
     }
 
 
-    private PostResponse convertToPostResponse(Post post) {
+    private PostResponse convertPostToPostResponse(Post post) {
         boolean isLiked = false;
 
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
@@ -163,9 +163,5 @@ public class PostService {
 
     private Long getCurrentUserId() {
         return authenticationHelper.getCurrentPrincipal().getUserId();
-    }
-
-    private String getLatestNickname(Long userId) {
-        return userRepository.findNicknameByUserId(userId).orElse("Unknown");
     }
 }

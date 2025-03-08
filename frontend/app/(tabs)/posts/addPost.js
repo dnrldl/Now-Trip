@@ -9,7 +9,6 @@ import {
   Image,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { addPost } from '../../../api/postApi';
 import { useRouter } from 'expo-router';
 import DropDownPicker from 'react-native-dropdown-picker';
