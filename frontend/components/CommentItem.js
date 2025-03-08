@@ -1,19 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import DateInfo from './DateInfo';
+import UserImage from './UserImage';
 
 export default function CommentItem({ comment }) {
   return (
     <View style={styles.commentContainer}>
-      {/* <Image
-        source={{
-          uri: comment.profileImage || 'https://via.placeholder.com/40',
-        }}
-        style={styles.profileImage}
-      /> */}
+      <UserImage size={40} uri={comment.authorProfileImage} />
       <View style={styles.commentContent}>
         <Text style={styles.username}>
-          {comment.createdBy + ' '}
+          {comment.authorNickname + ' '}
           <DateInfo createdAt={comment.createdAt} />
         </Text>
         <Text style={styles.text}>{comment.content}</Text>

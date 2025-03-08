@@ -14,6 +14,7 @@ import CommentList from './CommentList';
 import CommentInput from './CommentInput';
 import PostAction from './PostAction';
 import { useAuth } from '../contexts/AuthContext';
+import UserImage from './UserImage';
 
 export default function PostDetails() {
   const { postId } = useLocalSearchParams();
@@ -73,9 +74,11 @@ export default function PostDetails() {
         <View style={styles.postBox}>
           {/* 상단: 작성자 + 시간 */}
           <View style={styles.header}>
-            <Text style={styles.author}>{post.createdBy}</Text>
-            <Text style={styles.dot}>·</Text>
-            <DateInfo createdAt={post.createdAt} style={styles.dateText} />
+            <UserImage size={40} uri={post.authorProfileImage} />
+            <View>
+              <Text style={styles.author}>{post.authorNickname}</Text>
+              <DateInfo createdAt={post.createdAt} style={styles.dateText} />
+            </View>
           </View>
 
           {/* 제목 */}
@@ -135,10 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     fontWeight: 'bold',
-  },
-  dot: {
-    marginHorizontal: 5,
-    color: '#999',
+    marginBottom: 2,
   },
   dateText: {
     fontSize: 12,

@@ -2,9 +2,9 @@ package com.nowtrip.api.service.post;
 
 import com.nowtrip.api.entity.Comment;
 import com.nowtrip.api.entity.Post;
+import com.nowtrip.api.entity.User;
 import com.nowtrip.api.repository.CommentRepository;
 import com.nowtrip.api.repository.PostRepository;
-import com.nowtrip.api.repository.UserRepository;
 import com.nowtrip.api.response.post.CommentResponse;
 import com.nowtrip.api.service.auth.AuthenticationHelper;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +19,14 @@ import java.util.stream.Collectors;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final AuthenticationHelper authenticationHelper;
 
 
     public List<CommentResponse> getCommentsByPostId(Long postId) {
-        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
+        List<Object[]> results = commentRepository.findCommentsWithUserByPostId(postId);
 
-        return comments.stream()
-                .map(this::convertToCommentResponse)
+        return results.stream()
+                .map(row -> convertToCommentResponse((Comment) row[0], (User) row[1]))
                 .collect(Collectors.toList());
     }
 
@@ -40,9 +39,10 @@ public class CommentService {
                 .content(content)
                 .post(post)
                 .build();
+
         commentRepository.save(comment);
         postRepository.incrementCommentCount(postId);
-        return convertToCommentResponse(comment);
+        return convertToCommentResponse(comment, getCurrentUser());
     }
 
     @Transactional
@@ -72,14 +72,14 @@ public class CommentService {
         postRepository.decrementCommentCount(post.getId());
     }
 
-    private CommentResponse convertToCommentResponse(Comment comment) {
+    private CommentResponse convertToCommentResponse(Comment comment, User user) {
         return new CommentResponse(
                 comment.getId(),
                 comment.getPost().getId(),
                 comment.getContent(),
                 comment.getCreatedAt(),
-                comment.getUpdatedAt(),
-                getLatestNickname(comment.getCreatedBy())
+                user.getNickname(),
+                user.getProfile()
         );
     }
 
@@ -87,8 +87,8 @@ public class CommentService {
         return authenticationHelper.getCurrentPrincipal().getUserId();
     }
 
-    private String getLatestNickname(Long userId) {
-        return userRepository.findNicknameByUserId(userId).orElse("Unknown");
+    private User getCurrentUser() {
+        return authenticationHelper.getCurrentPrincipal().getUser();
     }
 
     private boolean isNotMine(Long commentId) {
