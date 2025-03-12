@@ -36,21 +36,4 @@ public class AuthController {
         String newAccessToken = authService.refreshAccessToken(request.get("refreshToken"), request.get("accessToken"));
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
-
-    @GetMapping("/validate-token")
-    public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization 헤더가 없습니다.");
-        }
-
-        String token = authorizationHeader.substring(7);
-        boolean isValid = jwtProvider.validateToken(token);
-
-        if (!isValid) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
-        }
-
-        return ResponseEntity.ok("토큰이 유효합니다.");
-    }
-
 }

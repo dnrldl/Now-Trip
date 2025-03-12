@@ -3,6 +3,7 @@ package com.nowtrip.api.security.jwt;
 import com.nowtrip.api.security.CustomUserDetailsService;
 import com.nowtrip.api.security.PrincipalDetails;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,13 +19,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * HTTP 요청에서 헤더의 JWT토큰을 추출 후 유효성 검사
- * 인증된 사용자 정보를 SecurityContext에 설정
- *
- * UsernamePasswordAuthenticationToken에서
- * 사용자 이름(username), 비밀번호(password), 권한(Authorities)을 설정할 수 있지만
- * JWT토큰 인증 방식에선 비밀번호를 사용하지 않고 권한이 JWT안에 포함되어있기 때문에
- * Credencial을 null로 설정
+ * JWT 인증 필터
+ * - HTTP 요청에서 Authorization 헤더를 읽어 JWT 토큰 검증 후 인증 처리
+ * - 만료된 토큰, 블랙리스트 토큰 예외 처리
  */
 @Component
 @RequiredArgsConstructor
@@ -42,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     throw new ExpiredJwtException(null, null, "토큰이 만료되었습니다");
 
                 if (isTokenBlacklisted(token))
-                    throw new IllegalArgumentException("블랙리스트에 있는 토큰입니다");
+                    throw new JwtException("블랙리스트에 있는 토큰입니다");
 
                 String email = jwtProvider.extractUsername(token);
                 PrincipalDetails userDetails = (PrincipalDetails) userDetailsService.loadUserByUsername(email);
@@ -54,8 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (ExpiredJwtException | IllegalArgumentException ex) {
-                sendErrorResponse(response, ex.getMessage());
+            } catch (JwtException ex) {
+                request.setAttribute("exception", ex.getMessage()); // Entry Point로 넘김
                 return;
             }
         }
@@ -73,12 +70,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return header.substring(7);
         }
         return null;
-    }
-
-    private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }

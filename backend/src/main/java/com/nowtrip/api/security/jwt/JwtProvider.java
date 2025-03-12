@@ -2,10 +2,7 @@ package com.nowtrip.api.security.jwt;
 
 import com.nowtrip.api.enums.Role;
 import com.nowtrip.api.security.PrincipalDetails;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.security.SignatureException;
 import java.util.Date;
 
 @Component
@@ -83,9 +81,16 @@ public class JwtProvider {
 
     public boolean validateToken(String token) {
         try {
-            return !isTokenExpired(token);
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            throw new JwtException("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            throw new JwtException("지원되지 않는 JWT 토큰입니다.");
+        } catch (MalformedJwtException e) {
+            throw new JwtException("손상된 JWT 토큰입니다.");
+        } catch (IllegalArgumentException e) {
+            throw new JwtException("JWT 토큰이 비어 있습니다.");
         }
     }
 

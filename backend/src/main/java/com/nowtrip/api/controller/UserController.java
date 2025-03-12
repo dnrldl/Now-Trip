@@ -37,7 +37,7 @@ public class UserController {
         return new ResponseEntity<>("비밀번호 변경 완료", HttpStatus.OK);
     }
 
-    @DeleteMapping("/me")
+    @DeleteMapping
     public ResponseEntity<String> deleteUser() {
         userService.deleteUser();
         return new ResponseEntity<>("유저 탈퇴 완료", HttpStatus.OK);
