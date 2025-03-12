@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -10,11 +10,18 @@ import DateInfo from './DateInfo';
 import PostAction from './PostAction';
 import PostImage from './PostImage';
 import UserImage from './UserImage';
+import FlagImage from './FlagImage';
+import { DataContext } from '../contexts/DataContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const PostItem = ({ item, router, path }) => {
   const [showFullText, setShowFullText] = useState(false);
+  const { countries } = useContext(DataContext);
+  const countryName = countries.find(
+    (item) => item.code == item.country
+  ).koreanName;
+
   return (
     <TouchableOpacity
       style={styles.postContainer}
@@ -28,11 +35,33 @@ const PostItem = ({ item, router, path }) => {
       {/* 작성자 정보 */}
       <View style={styles.postHeader}>
         <UserImage uri={item.authorProfileImage} size={40} />
-        <View style={styles.userInfo}>
-          <Text style={styles.username}>{item.authorNickname}</Text>
-          <Text style={styles.postDate}>
-            <DateInfo createdAt={item.createdAt} />
-          </Text>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flex: 1,
+          }}
+        >
+          <View style={styles.userInfo}>
+            <Text style={styles.username}>{item.authorNickname}</Text>
+            <Text style={styles.postDate}>
+              <DateInfo createdAt={item.createdAt} />
+            </Text>
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ color: '#999' }}>
+              {item.country == 'Unknown Country' ? '자유 게시판' : countryName}
+            </Text>
+          </View>
         </View>
       </View>
 

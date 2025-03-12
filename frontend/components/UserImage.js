@@ -3,11 +3,11 @@ import { Image } from 'react-native';
 
 export default function UserImage({ uri, size = 80 }) {
   const isValidUri = uri && typeof uri === 'string' && uri.startsWith('http');
-  const image = require('../assets/images/default_user_icon.png');
+  const defaultImage = require('../assets/images/default_user_icon.png');
 
   return (
     <Image
-      source={isValidUri ? { uri } : image}
+      source={isValidUri ? { uri } : defaultImage}
       style={{
         width: size,
         height: size,
@@ -15,7 +15,7 @@ export default function UserImage({ uri, size = 80 }) {
         marginRight: 15,
         resizeMode: 'cover',
         borderWidth: 0.5,
-        borderColor: '#000',
+        borderColor: '#999',
       }}
     />
   );
