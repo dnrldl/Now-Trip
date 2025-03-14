@@ -1,7 +1,7 @@
 import { publicAxios } from './axiosInstance';
 import handleError from './handleApiError';
 
-const PATH = '/recommendation';
+const PATH = '/recommendations';
 
 export const fetchRecommendations = async (budget) => {
   try {

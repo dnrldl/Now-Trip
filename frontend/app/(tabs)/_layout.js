@@ -13,6 +13,15 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
+        name='recommendation'
+        options={{
+          tabBarLabel: '추천 여행지',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name='airplane-outline' size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name='calculator'
         options={{
           tabBarLabel: '환율 계산기',

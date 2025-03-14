@@ -262,16 +262,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   flagWrapper: {
-    width: 40, // 크기 조정 (더 작게)
-    height: 40,
-    borderRadius: 50, // 원형 유지
-    overflow: 'hidden',
     marginHorizontal: 5, // 국기 간격 조정
-  },
-  flagImage: {
-    width: '100%', // 부모 컨테이너의 크기에 맞춤
-    height: '100%',
-    resizeMode: 'contain', // 국기가 잘리지 않고 축소되도록 설정
   },
   title: {
     fontSize: 18,

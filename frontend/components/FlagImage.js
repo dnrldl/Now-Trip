@@ -1,12 +1,14 @@
-import { Image } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import * as FileSystem from 'expo-file-system';
 
-const FlagImage = ({ countryCode, style }) => {
+const FlagImage = ({ countryCode, size = 50, style }) => {
   const [localUri, setLocalUri] = useState(null);
   const cdnBaseUrl = process.env.EXPO_PUBLIC_CDN_FLAG_URL;
-  const imageUrl = `${cdnBaseUrl}/${countryCode}.png`;
-  const localFilePath = `${FileSystem.documentDirectory}${countryCode}.png`;
+  const imageUrl = `${cdnBaseUrl}/${countryCode.toLowerCase()}.png`;
+  const localFilePath = `${
+    FileSystem.documentDirectory
+  }${countryCode.toLowerCase()}.png`;
 
   const downloadImage = async () => {
     try {
@@ -19,8 +21,8 @@ const FlagImage = ({ countryCode, style }) => {
       }
 
       console.log(`${imageUrl} 를 ${localFilePath} 에 다운로드중..`);
-      const { uri } = await FileSystem.downloadAsync(imageUrl, localFilePath);
 
+      const { uri } = await FileSystem.downloadAsync(imageUrl, localFilePath);
       setLocalUri(uri);
     } catch (error) {
       console.error('이미지 다운로드중 에러:', error);
@@ -34,13 +36,26 @@ const FlagImage = ({ countryCode, style }) => {
   if (!localUri) return null;
 
   return (
-    <Image
-      source={{ uri: localUri }}
-      style={[style, { width: '100%', height: '100%' }]}
-      resizeMode='center'
-    />
+    <View style={[styles.imageContainer, { width: size, height: size }]}>
+      <Image
+        source={{ uri: localUri }}
+        style={[styles.image, { width: size, height: size }, style]}
+        resizeMode='cover'
+      />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  imageContainer: {
+    borderRadius: 50, // 원형으로 만들기
+    overflow: 'hidden', // 둥근 테두리를 유지하기 위해 필요
+    backgroundColor: '#f0f0f0', // 이미지 로드 전 배경색 설정 (선택 사항)
+  },
+  image: {
+    borderRadius: 50, // 원형 적용
+  },
+});
 
 export const clearAllFiles = async () => {
   try {
