@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import SocialLoginButton from '../components/SocialLoginButton';
 
 const BACKEND_OAUTH_URL = 'http://localhost:8080/oauth2/authorization/';
 
@@ -79,17 +89,21 @@ export default function LoginScreen() {
         secureTextEntry
         autoCapitalize='none'
       />
+
       {error && <Text style={styles.errorText}>{error}</Text>}
-      <Button
-        title='구글 계정으로 로그인'
-        onPress={() => handleSocialLogin('google')}
-      />
-      <Button
-        title='네이버 계정으로 로그인'
-        onPress={() => handleSocialLogin('naver')}
-      />
       <Button title='로그인' onPress={handleLogin} />
       <Button title='회원가입' onPress={() => router.replace('/register')} />
+
+      <View style={styles.socialLoginContainer}>
+        <SocialLoginButton
+          platform='google'
+          onPress={() => handleSocialLogin('google')}
+        />
+        <SocialLoginButton
+          platform='naver'
+          onPress={() => handleSocialLogin('naver')}
+        />
+      </View>
     </View>
   );
 }
@@ -119,5 +133,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 5,
     marginLeft: 5,
+  },
+  socialLoginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 20,
   },
 });

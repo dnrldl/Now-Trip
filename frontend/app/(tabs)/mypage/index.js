@@ -52,8 +52,8 @@ export default function MyPageScreen() {
   // 비로그인 상태 처리
   if (!authState.isAuthenticated) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>로그인이 필요합니다</Text>
+      <View style={styles.center}>
+        <Text style={styles.authTitle}>로그인이 필요합니다</Text>
         <TouchableOpacity
           style={styles.authButton}
           onPress={() => router.push('/login')}
@@ -173,29 +173,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  tabContainer: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    marginBottom: 10,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#007BFF',
-  },
-  tabText: {
-    fontSize: 16,
-    color: '#777',
-  },
-  activeTabText: {
-    fontWeight: 'bold',
-    color: '#007BFF',
-  },
   logoutButton: {
     backgroundColor: '#FF3B3B',
     paddingVertical: 10,
@@ -204,6 +181,33 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  authTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  authButton: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    width: 100,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  authButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
