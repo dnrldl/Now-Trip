@@ -138,7 +138,7 @@ export const AuthProvider = ({ children }) => {
 
   // 앱 로드 시 실행
   useEffect(() => {
-    loadTokens;
+    loadTokens();
   }, []);
 
   return (

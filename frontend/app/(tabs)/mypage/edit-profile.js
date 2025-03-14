@@ -37,12 +37,18 @@ export default function EditProfileScreen() {
   };
 
   const handleSave = async () => {
+    if (!nickname && !profileImage) {
+      Alert.alert('프로필 편집 오류', '변경 사항을 입력해야 합니다.');
+      return;
+    }
+
     let uploadedImageUrl = null;
+    let response;
 
     try {
-      if (profileImage) {
-        setUploading(true);
+      setUploading(true);
 
+      if (profileImage) {
         const fileName = profileImage.split('/').pop(); // test.jpg
         const { presignedUrl, fileUrl } = await getPresignedUrl(
           fileName,
@@ -61,10 +67,12 @@ export default function EditProfileScreen() {
         uploadedImageUrl = fileUrl;
       }
 
-      const response = await updateProfile({
-        nickname,
-        profile: uploadedImageUrl,
-      });
+      // 프로필 업데이트 요청
+      const updateData = {};
+      if (nickname) updateData.nickname = nickname;
+      if (uploadedImageUrl) updateData.profile = uploadedImageUrl;
+
+      response = await updateProfile(updateData);
 
       console.log('결과: ', response);
       Alert.alert('프로필 변경', '프로필이 성공적으로 수정되었습니다.');

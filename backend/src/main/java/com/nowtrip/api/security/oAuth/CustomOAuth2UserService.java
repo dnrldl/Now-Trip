@@ -64,7 +64,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // 가입한 유저의 정보 최신 업데이트
             user = existUser.get();
             user.setName(socialName);
-            user.setProfile(socialPicture);
+//            user.setProfile(socialPicture);
         }
         userRepository.save(user);
 
