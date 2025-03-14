@@ -3,10 +3,10 @@ import handleError from './handleApiError';
 
 const PATH = '/posts';
 
-export const fetchPublicPosts = async (page) => {
+export const fetchPublicPosts = async (page, sortBy, iso2Code, period) => {
   try {
-    const response = await publicAxios.get(PATH, {
-      params: { page },
+    const response = await publicAxios.get(PATH + '/filter', {
+      params: { page, sortBy, iso2Code, period },
     });
     return response.data;
   } catch (error) {
@@ -14,10 +14,10 @@ export const fetchPublicPosts = async (page) => {
   }
 };
 
-export const fetchPrivatePosts = async (page) => {
+export const fetchPrivatePosts = async (page, sortBy, iso2Code, period) => {
   try {
-    const response = await privateAxios.get(PATH, {
-      params: { page },
+    const response = await privateAxios.get(PATH + '/filter', {
+      params: { page, sortBy, iso2Code, period },
     });
     return response.data;
   } catch (error) {

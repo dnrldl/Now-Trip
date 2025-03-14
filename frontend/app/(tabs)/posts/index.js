@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,21 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { useRouter } from 'expo-router';
 import { fetchPrivatePosts, fetchPublicPosts } from '../../../api/postApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import PostItem from '../../../components/PostItem';
+import { DataContext } from '../../../contexts/DataContext';
+
+const tabs = ['latest', 'likes', 'views', 'comments'];
+const periods = [
+  { label: '모든 기간', value: 'all' },
+  { label: '일간', value: 'daily' },
+  { label: '주간', value: 'weekly' },
+  { label: '월간', value: 'monthly' },
+  { label: '연간', value: 'yearly' },
+];
 
 export default function PostsScreen() {
   const [posts, setPosts] = useState([]);
@@ -21,17 +32,19 @@ export default function PostsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLast, setIsLast] = useState(false);
+  const [activeTab, setActiveTab] = useState('latest'); // 최신순, 인기순, 댓글 많은 순
+  const [selectedCountry, setSelectedCountry] = useState(null); // 나라 선택 필터
+  const [selectedPeriod, setSelectedPeriod] = useState('all'); // 기간 필터
+  const [openCountry, setOpenCountry] = useState(false);
+  const [openPeriod, setOpenPeriod] = useState(false);
   const flatListRef = useRef(null);
   const { authState } = useAuth();
+  const { countries } = useContext(DataContext); // 국가 리스트 가져오기
   const router = useRouter();
-
-  // let fetchPosts = authState.isAuthenticated
-  //   ? fetchPrivatePosts
-  //   : fetchPublicPosts;
 
   useEffect(() => {
     initPosts();
-  }, []);
+  }, [activeTab, selectedCountry, selectedPeriod]);
 
   const initPosts = async () => {
     setError(null);
@@ -40,11 +53,21 @@ export default function PostsScreen() {
     try {
       let response;
       if (authState.isAuthenticated && authState.accessToken) {
-        response = await fetchPrivatePosts(0);
+        response = await fetchPrivatePosts(
+          0,
+          activeTab,
+          selectedCountry,
+          selectedPeriod
+        );
       } else {
-        response = await fetchPublicPosts(0);
+        response = await fetchPublicPosts(
+          0,
+          activeTab,
+          selectedCountry,
+          selectedPeriod
+        );
       }
-      // const response = await fetchPosts(0);
+
       setPosts(response.content);
       setIsLast(false);
       setPage(0);
@@ -64,9 +87,19 @@ export default function PostsScreen() {
 
       let response = null;
       if (authState.isAuthenticated && authState.accessToken) {
-        response = await fetchPrivatePosts(nextPage);
+        response = await fetchPrivatePosts(
+          nextPage,
+          activeTab,
+          selectedCountry,
+          selectedPeriod
+        );
       } else {
-        response = await fetchPublicPosts(nextPage);
+        response = await fetchPublicPosts(
+          nextPage,
+          activeTab,
+          selectedCountry,
+          selectedPeriod
+        );
       }
 
       if (!response || !response.content) {
@@ -104,7 +137,7 @@ export default function PostsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size='large' color='#0000ff' />
+        <ActivityIndicator size='large' color='#007BFF' />
         <Text>게시글을 불러오는 중입니다...</Text>
       </View>
     );
@@ -129,6 +162,73 @@ export default function PostsScreen() {
         <TouchableOpacity style={styles.addButton} onPress={clickToAddPost}>
           <Text style={styles.addButtonText}>+ 작성</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* 필터 컨테이너 (탭 + 드롭다운) */}
+      <View style={styles.filterContainer}>
+        {/* 탭 필터 */}
+        <View style={styles.tabContainer}>
+          {tabs.map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab && styles.activeTabText,
+                ]}
+              >
+                {tab === 'latest'
+                  ? '최신'
+                  : tab === 'likes'
+                  ? '좋아요 수'
+                  : tab === 'views'
+                  ? '조회 수'
+                  : '댓글 수'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={styles.dropdownContainer}>
+          <View style={styles.dropdownWrapper}>
+            {/* 국가 필터 드롭다운 */}
+            <DropDownPicker
+              open={openCountry}
+              value={selectedCountry}
+              items={[
+                { label: '전체 국가', value: null },
+                { label: '자유 게시판', value: 'free' },
+                ...countries.map((c) => ({
+                  label: c.koreanName,
+                  value: c.iso2Code,
+                })),
+              ]}
+              setOpen={setOpenCountry}
+              setValue={setSelectedCountry}
+              placeholder='전체 국가'
+              style={styles.dropdown}
+              dropDownContainerStyle={{ borderColor: '#aaa' }}
+              textStyle={{ color: '#333' }}
+            />
+          </View>
+
+          <View style={styles.dropdownWrapper}>
+            {/* 기간 필터 */}
+            <DropDownPicker
+              open={openPeriod}
+              value={selectedPeriod}
+              items={periods}
+              setOpen={setOpenPeriod}
+              setValue={setSelectedPeriod}
+              style={styles.dropdown}
+              dropDownContainerStyle={{ borderColor: '#aaa' }}
+              textStyle={{ color: '#333' }}
+            />
+          </View>
+        </View>
       </View>
 
       {/* 게시글 목록 */}
@@ -181,24 +281,58 @@ const styles = StyleSheet.create({
   },
   addButtonText: { color: '#fff', fontWeight: 'bold' },
 
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  refreshButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  refreshText: {
-    color: '#007bff',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
   listFootText: {
     textAlign: 'center',
     paddingVertical: 10,
     color: '#777',
+  },
+
+  filterContainer: {
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    marginBottom: 10,
+  },
+  tab: {
+    paddingVertical: 10,
+    flex: 1,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#007BFF',
+  },
+  tabText: {
+    fontSize: 16,
+    color: '#777',
+  },
+  activeTabText: {
+    color: '#007BFF',
+    fontWeight: 'bold',
+  },
+
+  dropdownContainer: {
+    flexDirection: 'row', // 가로 정렬
+    justifyContent: 'space-between', // 좌우 정렬
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderBottomColor: '#aaa',
+    borderBottomWidth: 0.5,
+  },
+  dropdownWrapper: {
+    flex: 1, // 각 드롭다운이 같은 너비를 차지하도록 설정
+    marginHorizontal: 5, // 좌우 간격 조절
+  },
+  dropdown: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 10,
+    borderColor: '#aaa',
   },
 });

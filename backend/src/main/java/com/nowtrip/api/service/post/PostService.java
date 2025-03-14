@@ -1,11 +1,14 @@
 package com.nowtrip.api.service.post;
 
 import com.nowtrip.api.entity.Country;
-import com.nowtrip.api.entity.PostLike;
 import com.nowtrip.api.entity.Post;
+import com.nowtrip.api.entity.PostLike;
 import com.nowtrip.api.entity.User;
 import com.nowtrip.api.exception.UserNotFoundException;
-import com.nowtrip.api.repository.*;
+import com.nowtrip.api.repository.CountryRepository;
+import com.nowtrip.api.repository.PostLikeRepository;
+import com.nowtrip.api.repository.PostRepository;
+import com.nowtrip.api.repository.UserRepository;
 import com.nowtrip.api.request.PostRequest;
 import com.nowtrip.api.response.post.PostResponse;
 import com.nowtrip.api.service.auth.AuthenticationHelper;
@@ -17,8 +20,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,7 +40,7 @@ public class PostService {
     // 게시글 조회 (메인 화면)
     public Page<PostResponse> getPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Post> posts = postRepository.findAllWithoutComments(pageable);
+        Page<Post> posts = postRepository.findAllPosts(pageable);
 
         return convertPostsToPostResponses(posts);
     }
@@ -53,6 +58,46 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글 ID: " + id + " 을 찾을 수 없습니다"));
         return convertPostToPostResponse(post);
+    }
+
+    // 게시글 필터링 조회
+    public Page<PostResponse> getFilteredPosts(int page, int size, String iso2Code, String sortBy, String period) {
+        Pageable pageable = switch (sortBy.toLowerCase()) {
+            case "latest" ->
+                    PageRequest.of(page, size, Sort.by("createdAt").descending());
+            case "likes" -> // 좋아요 수 기준
+                    PageRequest.of(page, size, Sort.by("likeCount").descending());
+            case "views" -> // 조회수 기준
+                    PageRequest.of(page, size, Sort.by("viewCount").descending());
+            case "comments" -> // 댓글 수 기준
+                    PageRequest.of(page, size, Sort.by("commentCount").descending());
+            default -> // 최신순 (기본값)
+                    PageRequest.of(page, size, Sort.by("createdAt").descending());
+        };
+
+        // 정렬 기준 설정 (기본: 최신순)
+
+        Page<Post> posts;
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = switch (period) {
+            case "daily" -> endDate.minusDays(1);
+            case "weekly" -> endDate.minusWeeks(1);
+            case "monthly" -> endDate.minusMonths(1);
+            case "yearly" -> endDate.minusYears(1);
+            case "all" -> LocalDateTime.of(1970,1,1,0,0);
+            default -> LocalDateTime.of(1970,1,1,0,0);
+        };
+
+        // 특정 국가별 필터링
+        if ("free".equalsIgnoreCase(iso2Code)) {
+            posts = postRepository.findPostsWithNullCountry(startDate, pageable);
+        } else if (iso2Code != null && !iso2Code.trim().isEmpty()) {
+            posts = postRepository.findByCountryAndCreatedAtAfter(iso2Code.toLowerCase(), startDate, pageable);
+        } else {
+            posts = postRepository.findByCreatedAtAfter(startDate, pageable);
+        }
+
+        return convertPostsToPostResponses(posts);
     }
 
     // 국가 코드로 게시글 조회

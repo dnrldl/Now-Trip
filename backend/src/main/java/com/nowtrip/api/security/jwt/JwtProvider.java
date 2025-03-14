@@ -10,13 +10,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.security.SignatureException;
 import java.util.Date;
 
 @Component
 public class JwtProvider {
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
-    private final long ACCESS_TOKEN_VALIDITY = 1000; // 24시간
+    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60 * 24; // 24시간
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7; // 일주일
 
     public String generateAccessToken(Authentication auth) {

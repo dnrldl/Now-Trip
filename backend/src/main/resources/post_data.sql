@@ -1,27 +1,17 @@
 INSERT INTO posts (title, content, image_url, country_id, created_by, created_at, updated_at, like_count, comment_count, view_count) VALUES
+-- ✅ 최근 1일 이내 게시글 (일간)
 ('호주의 시드니 오페라하우스 방문기', '시드니의 대표적인 랜드마크에서 멋진 야경을 감상했습니다.', 'https://source.unsplash.com/400x300/?sydney,opera', 1, 1, NOW(), NOW(), 10, 5, 200),
 ('오스트리아 빈 숀브룬 궁전 탐방', '화려한 궁전과 정원이 어우러진 빈의 대표 명소.', 'https://source.unsplash.com/400x300/?vienna,palace', 2, 1, NOW(), NOW(), 8, 3, 150),
-('브라질 리우데자네이루 해변 여행', '코파카바나 해변에서 브라질의 정열을 느껴보세요!', 'https://source.unsplash.com/400x300/?brazil,beach', 3, 1, NOW(), NOW(), 15, 7, 320),
-('캐나다 로키산맥 하이킹', '웅장한 로키산맥을 등반하며 자연을 만끽한 여행.', 'https://source.unsplash.com/400x300/?canada,rocky', 4, 1, NOW(), NOW(), 12, 4, 180),
-('중국 만리장성 투어', '세계 7대 불가사의 중 하나인 만리장성을 걸으며.', 'https://source.unsplash.com/400x300/?china,greatwall', 5, 1, NOW(), NOW(), 9, 2, 130),
-('체코 프라하 구시가지 여행', '유럽의 보석, 프라하에서 즐긴 감성 여행.', 'https://source.unsplash.com/400x300/?prague,city', 6, 1, NOW(), NOW(), 5, 2, 110),
-('이집트 피라미드 탐방', '기원전부터 이어진 피라미드와 스핑크스를 직접 보다.', 'https://source.unsplash.com/400x300/?egypt,pyramids', 7, 1, NOW(), NOW(), 7, 1, 140),
-('프랑스 파리 에펠탑 야경', '낭만적인 파리에서 에펠탑의 불빛을 감상한 밤.', 'https://source.unsplash.com/400x300/?paris,eiffel', 8, 1, NOW(), NOW(), 9, 3, 190),
-('독일 베를린 장벽 방문기', '독일 통일의 상징인 베를린 장벽을 직접 본 소감.', 'https://source.unsplash.com/400x300/?berlin,wall', 9, 1, NOW(), NOW(), 4, 1, 95),
-('그리스 산토리니에서의 휴식', '파란 지붕과 아름다운 바다가 조화를 이루는 산토리니.', 'https://source.unsplash.com/400x300/?santorini,sea', 10, 1, NOW(), NOW(), 6, 3, 120),
-('홍콩 빅토리아 피크 야경 감상', '아시아 최고의 야경을 볼 수 있는 장소, 홍콩 피크.', 'https://source.unsplash.com/400x300/?hongkong,night', 12, 1, NOW(), NOW(), 13, 5, 250),
-('인도네시아 발리 휴양 여행', '우붓에서 즐기는 요가와 평온한 자연.', 'https://source.unsplash.com/400x300/?bali,beach', 13, 1, NOW(), NOW(), 11, 6, 210),
-('이탈리아 로마 콜로세움 방문기', '고대 로마의 전설적인 원형 경기장을 탐방한 후기.', 'https://source.unsplash.com/400x300/?rome,colosseum', 14, 1, NOW(), NOW(), 14, 3, 290),
-('일본 도쿄 벚꽃놀이', '봄이 되면 꼭 가봐야 할 도쿄의 벚꽃 명소들.', 'https://source.unsplash.com/400x300/?tokyo,sakura', 15, 1, NOW(), NOW(), 16, 7, 310),
-('말레이시아 페트로나스 타워 야경', '쿠알라룸푸르의 랜드마크, 멋진 타워를 감상한 후기.', 'https://source.unsplash.com/400x300/?kualalumpur,tower', 16, 1, NOW(), NOW(), 7, 2, 140),
-('멕시코 칸쿤 해변 여행', '에메랄드빛 바다와 이국적인 분위기를 만끽.', 'https://source.unsplash.com/400x300/?mexico,beach', 17, 1, NOW(), NOW(), 8, 4, 160),
-('뉴질랜드 퀸스타운 스카이다이빙', '짜릿한 경험! 퀸스타운에서 즐긴 액티비티.', 'https://source.unsplash.com/400x300/?newzealand,skydiving', 19, 1, NOW(), NOW(), 6, 1, 100),
-('필리핀 세부 호핑투어', '세부의 투명한 바다에서 즐긴 호핑투어와 스노클링.', 'https://source.unsplash.com/400x300/?cebu,beach', 20, 1, NOW(), NOW(), 12, 5, 220),
-('대한민국 제주도 올레길 걷기', '제주도의 자연과 바람을 느끼며 걸은 올레길.', 'https://source.unsplash.com/400x300/?jeju,sea', 22, 1, NOW(), NOW(), 10, 4, 200),
-('스페인 바르셀로나 가우디 건축물 여행', '가우디의 걸작들을 감상한 바르셀로나 투어.', 'https://source.unsplash.com/400x300/?barcelona,gaudi', 24, 1, NOW(), NOW(), 9, 3, 190),
-('스위스 인터라켄 패러글라이딩', '알프스의 절경을 하늘에서 감상한 짜릿한 경험.', 'https://source.unsplash.com/400x300/?swiss,paragliding', 25, 1, NOW(), NOW(), 14, 3, 280),
-('태국 방콕 야시장 탐방', '카오산로드와 다양한 야시장을 둘러본 여행기.', 'https://source.unsplash.com/400x300/?bangkok,market', 27, 1, NOW(), NOW(), 8, 2, 150),
-('터키 카파도키아 열기구 여행', '하늘을 나는 열기구에서 내려다본 터키의 절경.', 'https://source.unsplash.com/400x300/?cappadocia,balloon', 28, 1, NOW(), NOW(), 10, 4, 170),
-('아랍에미리트 두바이 사막투어', '사막을 달리는 익사이팅한 경험!', 'https://source.unsplash.com/400x300/?dubai,desert', 29, 1, NOW(), NOW(), 6, 1, 100),
-('미국 뉴욕 센트럴파크 산책', '센트럴파크의 가을 단풍이 너무 아름다웠어요.', 'https://source.unsplash.com/400x300/?newyork,centralpark', 31, 1, NOW(), NOW(), 15, 7, 320),
-('베트남 하노이 하롱베이 크루즈', '웅장한 자연경관을 즐길 수 있는 베트남 하롱베이.', 'https://source.unsplash.com/400x300/?halongbay,cruise', 32, 1, NOW(), NOW(), 13, 5, 250);
+
+-- ✅ 최근 1주일 이내 게시글 (주간)
+('브라질 리우데자네이루 해변 여행', '코파카바나 해변에서 브라질의 정열을 느껴보세요!', 'https://source.unsplash.com/400x300/?brazil,beach', 3, 1, DATE_SUB(NOW(), INTERVAL 4 DAY), NOW(), 15, 7, 320),
+('캐나다 로키산맥 하이킹', '웅장한 로키산맥을 등반하며 자연을 만끽한 여행.', 'https://source.unsplash.com/400x300/?canada,rocky', 4, 1, DATE_SUB(NOW(), INTERVAL 5 DAY), NOW(), 12, 4, 180),
+
+-- ✅ 최근 1개월 이내 게시글 (월간)
+('중국 만리장성 투어', '세계 7대 불가사의 중 하나인 만리장성을 걸으며.', 'https://source.unsplash.com/400x300/?china,greatwall', 5, 1, DATE_SUB(NOW(), INTERVAL 14 DAY), NOW(), 9, 2, 130),
+('체코 프라하 구시가지 여행', '유럽의 보석, 프라하에서 즐긴 감성 여행.', 'https://source.unsplash.com/400x300/?prague,city', 6, 1, DATE_SUB(NOW(), INTERVAL 25 DAY), NOW(), 5, 2, 110),
+
+-- ✅ 최근 1년 이내 게시글 (연간)
+('이집트 피라미드 탐방', '기원전부터 이어진 피라미드와 스핑크스를 직접 보다.', 'https://source.unsplash.com/400x300/?egypt,pyramids', 7, 1, DATE_SUB(NOW(), INTERVAL 123 DAY), NOW(), 7, 1, 140),
+('프랑스 파리 에펠탑 야경', '낭만적인 파리에서 에펠탑의 불빛을 감상한 밤.', 'https://source.unsplash.com/400x300/?paris,eiffel', 8, 1, DATE_SUB(NOW(), INTERVAL 65 DAY), NOW(), 9, 3, 190),
+('독일 베를린 장벽 방문기', '독일 통일의 상징인 베를린 장벽을 직접 본 소감.', 'https://source.unsplash.com/400x300/?berlin,wall', 9, 1, DATE_SUB(NOW(), INTERVAL 89 DAY), NOW(), 4, 1, 95);

@@ -35,6 +35,19 @@ public class PostController {
         return ResponseEntity.ok(postService.getPosts(page, size));
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<Page<PostResponse>> getFilteredPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String iso2Code,
+            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "all") String period
+            ) {
+
+        Page<PostResponse> filteredPosts = postService.getFilteredPosts(page, size, iso2Code, sortBy, period);
+        return ResponseEntity.ok(filteredPosts);
+    }
+
     @GetMapping("/myPosts")
     public ResponseEntity<Page<PostResponse>> getMyPosts(
             @RequestParam(defaultValue = "0") int page,

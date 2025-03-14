@@ -22,7 +22,6 @@ public class RecommendationController {
     public ResponseEntity<List<RecommendationResponse>> getRecommendations(
             @RequestParam BigDecimal budget) {
         List<RecommendationResponse> recommendations = recommendationService.recommendDestinations(budget);
-        System.out.println("recommendations = " + recommendations);
         return ResponseEntity.ok(recommendations);
     }
 }
