@@ -50,7 +50,6 @@ public class AuthService {
     }
 
     public void logout(String accessToken) {
-        System.out.println("accessToken = " + accessToken);
         String userId = jwtProvider.extractUserId(accessToken).toString();
         Long expiration = jwtProvider.extractExpiration(accessToken);
         long ttl = expiration - System.currentTimeMillis();

@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -10,17 +10,11 @@ import DateInfo from './DateInfo';
 import PostAction from './PostAction';
 import PostImage from './PostImage';
 import UserImage from './UserImage';
-import FlagImage from './FlagImage';
-import { DataContext } from '../contexts/DataContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const PostItem = ({ item, router, path }) => {
   const [showFullText, setShowFullText] = useState(false);
-  const { countries } = useContext(DataContext);
-  const countryName = countries.find(
-    (item) => item.code == item.country
-  ).koreanName;
 
   return (
     <TouchableOpacity
@@ -59,7 +53,7 @@ const PostItem = ({ item, router, path }) => {
             }}
           >
             <Text style={{ color: '#999' }}>
-              {item.country == 'Unknown Country' ? '자유 게시판' : countryName}
+              {item.country == 'Unknown Country' ? '자유 게시판' : item.country}
             </Text>
           </View>
         </View>

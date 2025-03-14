@@ -140,7 +140,7 @@ public class PostService {
 
     private PostResponse convertToPostResponse(Post post, boolean isLiked) {
         String countryName = Optional.ofNullable(post.getCountry())
-                .map(Country::getIso2Code)
+                .map(Country::getKoreanName)
                 .orElse(UNKNOWN_COUNTRY);
 
         User author = userRepository.findById(post.getCreatedBy()).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다."));

@@ -13,6 +13,7 @@ export default function PostImage({ uri }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [visible, setVisible] = useState(false);
+  const defaultImage = require('../assets/images/favicon.png');
 
   return (
     <View style={styles.container}>
@@ -22,11 +23,7 @@ export default function PostImage({ uri }) {
           <ActivityIndicator size='small' color='#000' style={styles.loader} />
         )}
         <Image
-          source={
-            error
-              ? require('../assets/images/favicon.png') // 실패 시 기본 이미지
-              : { uri }
-          }
+          source={error ? defaultImage : { uri }}
           style={styles.image}
           onLoad={() => setLoading(false)}
           onError={() => setError(true)}
@@ -35,7 +32,7 @@ export default function PostImage({ uri }) {
 
       {/* 이미지 상세 */}
       <ImageViewing
-        images={[{ uri }]}
+        images={[error ? defaultImage : { uri }]}
         imageIndex={0}
         visible={visible}
         onRequestClose={() => setVisible(false)}

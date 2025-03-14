@@ -15,6 +15,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { getPresignedUrl } from '../../../api/s3Api';
 import axios from 'axios';
 import { DataContext } from '../../../contexts/DataContext';
+import ImageViewing from 'react-native-image-viewing';
 
 export default function AddPostScreen() {
   const [title, setTitle] = useState('');
@@ -24,6 +25,7 @@ export default function AddPostScreen() {
   const [imageType, setImageType] = useState('');
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false); // 드롭다운 열기/닫기 상태
+  const [visible, setVisible] = useState(false); // 이미지 미리보기 상태
   const router = useRouter();
   const { countries } = useContext(DataContext);
 
@@ -106,13 +108,7 @@ export default function AddPostScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>새로운 게시글</Text>
-      <TextInput
-        style={styles.input}
-        placeholder='제목을 입력하세요'
-        value={title}
-        onChangeText={(text) => setTitle(text)}
-        autoCapitalize='none'
-      />
+
       <DropDownPicker
         open={open}
         value={iso2Code}
@@ -125,7 +121,17 @@ export default function AddPostScreen() {
         placeholder='국가 선택'
         dropDownContainerStyle={styles.dropdownContainer}
         style={styles.dropdown}
+        placeholderStyle={{ color: '#222' }}
       />
+
+      <TextInput
+        style={styles.input}
+        placeholder='제목을 입력하세요'
+        value={title}
+        onChangeText={(text) => setTitle(text)}
+        autoCapitalize='none'
+      />
+
       <TextInput
         style={[styles.input, styles.textArea]}
         placeholder='내용을 입력하세요'
@@ -142,7 +148,10 @@ export default function AddPostScreen() {
 
       {/* 이미지 미리보기 */}
       {image && (
-        <TouchableOpacity onLongPress={() => setImage(null)}>
+        <TouchableOpacity
+          onPress={() => setVisible(true)}
+          onLongPress={() => setImage(null)}
+        >
           <Image
             source={{ uri: image }}
             style={styles.preview}
@@ -161,6 +170,13 @@ export default function AddPostScreen() {
           {uploading ? '업로드 중...' : '등록'}
         </Text>
       </TouchableOpacity>
+
+      <ImageViewing
+        images={[{ uri: image }]}
+        imageIndex={0}
+        visible={visible}
+        onRequestClose={() => setVisible(false)}
+      />
     </View>
   );
 }
@@ -182,9 +198,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
-    marginBottom: 15,
+    marginBottom: 10,
   },
   dropdown: {
+    borderWidth: 1,
+    borderColor: '#ccc',
     marginBottom: 10,
   },
   textArea: {
@@ -199,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   imageButtonText: { color: '#000', fontSize: 16, fontWeight: 'bold' },
-  preview: { width: '100%', height: 200, borderRadius: 8, marginVertical: 10 },
+  preview: { width: '100%', height: 250, borderRadius: 8, marginVertical: 10 },
   button: {
     backgroundColor: '#007BFF',
     paddingVertical: 15,
