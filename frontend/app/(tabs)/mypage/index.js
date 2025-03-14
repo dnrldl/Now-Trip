@@ -88,7 +88,8 @@ export default function MyPageScreen() {
         <TouchableOpacity
           style={styles.logoutButton}
           onPress={async () => {
-            await logout();
+            await deleteTokens();
+            Alert.alert('로그아웃', '로그아웃 되었습니다.');
             router.replace('/');
           }}
         >

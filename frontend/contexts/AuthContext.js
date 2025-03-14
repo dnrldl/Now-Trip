@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { saveToken, getToken, deleteToken } from '../utils/secureStore';
-import { loginRequest, logoutRequest, validateToken } from '../api/authApi';
+import { loginRequest, logoutRequest } from '../api/authApi';
 import { Alert } from 'react-native';
 import { publicAxios } from '../api/axiosInstance';
 
@@ -40,6 +40,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const setToken = async (key, value) => {
+    await saveToken(key, value);
+    setAuthState((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
+
   // 토큰들 SecureStore에 저장
   const setTokens = async (accessToken, refreshToken) => {
     await saveToken(ACCESS, accessToken);
@@ -68,7 +76,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loadTokens = async () => {
-    const isValid = await validateToken();
     const accessToken = await getToken(ACCESS);
     const refreshToken = await getToken(REFRESH);
 
@@ -77,31 +84,36 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    // 토큰 유효시
-    if (isValid) {
+    if (accessToken && refreshToken) {
       setAuthState({
         accessToken,
         refreshToken,
         isAuthenticated: true,
       });
-
-      console.log('토큰 로드 완료');
-      console.log('accessToken:', accessToken);
-      console.log('refreshToken:', refreshToken);
     } else {
-      // 토큰 만료시
-      console.log('토큰이 유효하지 않습니다.');
-      await deleteTokens();
-      Alert.alert('세션 만료', '다시 로그인이 필요합니다.');
+      setAuthState({
+        accessToken: null,
+        refreshToken: null,
+        isAuthenticated: false,
+      });
     }
   };
 
   // 리프레시 토큰으로 엑세스 토큰 갱신
   const refreshAccessToken = async () => {
     try {
-      const response = await publicAxios.post('/api/auth/refresh-token', {
-        refreshToken: authState.refreshToken,
-      });
+      const refreshToken = await getToken(REFRESH);
+      if (!refreshToken) throw new Error('리프레시 토큰이 없습니다.');
+
+      const response = await publicAxios.post(
+        '/auth/refresh-token',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
+        }
+      );
 
       const newAccessToken = response.data.accessToken;
 
@@ -126,7 +138,7 @@ export const AuthProvider = ({ children }) => {
 
   // 앱 로드 시 실행
   useEffect(() => {
-    loadTokens();
+    loadTokens;
   }, []);
 
   return (
@@ -135,11 +147,11 @@ export const AuthProvider = ({ children }) => {
         authState,
         login,
         logout,
+        setTokens,
         refreshAccessToken,
         updateAuthState,
-        loadTokens,
         deleteTokens,
-        setTokens,
+        setToken,
       }}
     >
       {children}

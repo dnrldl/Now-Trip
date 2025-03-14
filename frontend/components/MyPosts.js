@@ -43,6 +43,7 @@ export default function MyPosts() {
     try {
       const nextPage = page + 1;
       setPage(nextPage);
+
       const data = await fetchMyPosts(nextPage);
       if (nextPage === data.page.totalPages - 1) setIsLast(true);
       setPosts((prev) => [...prev, ...data.content]);
@@ -97,13 +98,18 @@ export default function MyPosts() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onEndReachedThreshold={0.7}
-        onEndReached={handleLoadMore}
+        onEndReached={() => {
+          if (!loading && posts?.length > 0) {
+            handleLoadMore();
+          }
+        }}
+        ListEmptyComponent={
+          <Text style={styles.listFootText}>게시글이 없습니다.</Text>
+        }
         ListFooterComponent={
-          posts.length == 0 ? (
-            <Text style={styles.listFootText}>게시글이 없습니다.</Text>
-          ) : (
+          posts?.length > 0 ? (
             <Text style={styles.listFootText}>마지막 게시글입니다.</Text>
-          )
+          ) : null
         }
       />
     </View>

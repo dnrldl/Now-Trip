@@ -1,5 +1,6 @@
 package com.nowtrip.api.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nowtrip.api.security.CustomUserDetailsService;
 import com.nowtrip.api.security.PrincipalDetails;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * JWT 인증 필터
@@ -52,8 +55,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException ex) {
-                request.setAttribute("exception", ex.getMessage()); // Entry Point로 넘김
-                return;
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                Map<String, Object> responseData = new HashMap<>();
+                responseData.put("timestamp", System.currentTimeMillis());
+                responseData.put("status", 401);
+                responseData.put("error", "Unauthorized");
+                responseData.put("message", "인증이 필요합니다.");
+                responseData.put("path", request.getRequestURI());
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                response.getWriter().write(objectMapper.writeValueAsString(responseData));
+
+                return ;
             }
         }
 

@@ -22,15 +22,14 @@ export default function PostsScreen() {
   const [error, setError] = useState(null);
   const [isLast, setIsLast] = useState(false);
   const flatListRef = useRef(null);
-  const { authState, loadTokens } = useAuth();
+  const { authState } = useAuth();
   const router = useRouter();
 
-  let fetchPosts = authState.isAuthenticated
-    ? fetchPrivatePosts
-    : fetchPublicPosts;
+  // let fetchPosts = authState.isAuthenticated
+  //   ? fetchPrivatePosts
+  //   : fetchPublicPosts;
 
   useEffect(() => {
-    loadTokens();
     initPosts();
   }, []);
 
@@ -39,7 +38,13 @@ export default function PostsScreen() {
     setLoading(true);
     setRefreshing(false);
     try {
-      const response = await fetchPosts(0);
+      let response;
+      if (authState.isAuthenticated && authState.accessToken) {
+        response = await fetchPrivatePosts(0);
+      } else {
+        response = await fetchPublicPosts(0);
+      }
+      // const response = await fetchPosts(0);
       setPosts(response.content);
       setIsLast(false);
       setPage(0);
@@ -56,9 +61,22 @@ export default function PostsScreen() {
     try {
       const nextPage = page + 1;
       setPage(nextPage);
-      const data = await fetchPosts(nextPage);
-      if (nextPage === data.page.totalPages - 1) setIsLast(true);
-      setPosts((prev) => [...prev, ...data.content]);
+
+      let response = null;
+      if (authState.isAuthenticated && authState.accessToken) {
+        response = await fetchPrivatePosts(nextPage);
+      } else {
+        response = await fetchPublicPosts(nextPage);
+      }
+
+      if (!response || !response.content) {
+        console.warn('게시글 데이터를 불러오지 못했습니다.');
+        return;
+      }
+
+      if (nextPage === response?.page?.totalPages - 1) setIsLast(true);
+
+      setPosts((prev) => [...prev, ...response.content]);
     } catch (err) {
       console.error(err);
     }
@@ -74,7 +92,6 @@ export default function PostsScreen() {
   };
 
   const clickToAddPost = async () => {
-    loadTokens();
     if (!authState.isAuthenticated) {
       Alert.alert('로그인 필요!', '로그인 후 이용해주세요.', [
         { text: '확인' },
@@ -126,13 +143,18 @@ export default function PostsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onEndReachedThreshold={0.7}
-        onEndReached={handleLoadMore}
+        onEndReached={() => {
+          if (!loading && posts?.length > 0) {
+            handleLoadMore();
+          }
+        }}
+        ListEmptyComponent={
+          <Text style={styles.listFootText}>게시글이 없습니다.</Text>
+        }
         ListFooterComponent={
-          posts.length == 0 ? (
-            <Text style={styles.listFootText}>게시글이 없습니다.</Text>
-          ) : (
+          posts?.length > 0 ? (
             <Text style={styles.listFootText}>마지막 게시글입니다.</Text>
-          )
+          ) : null
         }
       />
     </View>

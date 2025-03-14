@@ -76,14 +76,13 @@ export default function AddPostScreen() {
       }
 
       // 게시글 추가
-      const response = await addPost({
+      await addPost({
         title,
         content,
         iso2Code,
         imageUrl: uploadedImageUrl,
       });
 
-      console.log('게시글 작성 결과:', response);
       Alert.alert('게시글 등록', '게시글이 등록되었습니다.');
       router.dismiss();
     } catch (error) {

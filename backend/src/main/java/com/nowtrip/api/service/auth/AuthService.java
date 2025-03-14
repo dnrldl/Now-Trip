@@ -36,6 +36,7 @@ public class AuthService {
 
             String accessToken = jwtProvider.generateAccessToken(auth);
             String refreshToken = jwtProvider.generateRefreshToken(auth);
+
             Long expiration = jwtProvider.extractExpiration(refreshToken); // 절대 시간 반환 e.g. ~월 ~일
             long ttl = expiration - System.currentTimeMillis(); // 남은 시간 반환
 
@@ -69,29 +70,19 @@ public class AuthService {
         }
     }
 
-    public String refreshAccessToken(String refreshToken, String oldAccessToken) {
+    public String refreshAccessToken(String refreshToken) {
         if (jwtProvider.isTokenExpired(refreshToken))
             throw new JwtException("refresh 토큰이 유효하지 않습니다.");
 
         String userId = jwtProvider.extractUserId(refreshToken).toString();
         String email = jwtProvider.extractUsername(refreshToken);
 
-        // redis에 저장된 리프레시 토큰 추출
+        // Redis에서 저장된 Refresh Token 확인
         String storedToken = redisTemplate.opsForValue().get("refreshToken:" + userId);
-        if (storedToken == null)
-            throw new BadCredentialsException("redis에 저장된 refresh 토큰이 없습니다.");
-        if (!storedToken.equals(refreshToken))
-            throw new BadCredentialsException("redis에 저장된 refresh 토큰이 일치하지 않습니다.");
+        if (storedToken == null || !storedToken.equals(refreshToken))
+            throw new BadCredentialsException("redis에 저장된 refresh 토큰이 없거나 일치하지 않습니다.");
 
-        // 만료된 토큰의 만료시간 추출
-        Long expiration = jwtProvider.extractExpiration(oldAccessToken);
-        long ttl = expiration - System.currentTimeMillis();
-
-        // redis에 기존 엑세스 토큰을 남은 유효시간동안 블랙리스트 등록
-        if (ttl > 0)
-            redisTemplate.opsForValue().set("blacklist:" + oldAccessToken, userId, ttl, TimeUnit.MILLISECONDS);
-
-        // 새로운 액세스 토큰 발급
+        // 새로운 Access Token 발급
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 userDetails,
@@ -99,9 +90,7 @@ public class AuthService {
                 userDetails.getAuthorities()
         );
 
-        String newAccessToken = jwtProvider.generateAccessToken(auth);
-
-        return newAccessToken;
+        return jwtProvider.generateAccessToken(auth);
     }
 }
 

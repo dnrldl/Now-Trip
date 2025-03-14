@@ -13,6 +13,7 @@ const FlagImage = ({ countryCode, style }) => {
       const fileInfo = await FileSystem.getInfoAsync(localFilePath);
 
       if (fileInfo.exists) {
+        console.log('캐시된 이미지 사용');
         setLocalUri(localFilePath);
         return;
       }

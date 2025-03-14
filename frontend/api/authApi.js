@@ -27,12 +27,3 @@ export const logoutRequest = async () => {
     handleError(error);
   }
 };
-
-export const validateToken = async () => {
-  try {
-    const response = await privateAxios.get('/auth/validate-token');
-    return response.status === 200;
-  } catch (error) {
-    return false;
-  }
-};
