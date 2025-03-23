@@ -3,8 +3,6 @@ package com.nowtrip.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @Setter
@@ -12,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "comment_likes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "comment_id"}) // ✅ 중복 좋아요 방지
+        @UniqueConstraint(columnNames = {"user_id", "comment_id"})
 })
 public class CommentLike {
     @Id

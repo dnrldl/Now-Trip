@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Table(name = "post_likes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"post_id", "user_id"}) // 중복 좋아요 방지
+        @UniqueConstraint(columnNames = {"post_id", "user_id"})
 })
 public class PostLike {
     @Id
