@@ -1,89 +1,138 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
-import { useExchangeRates } from '../../contexts/ExchangeRateContext';
 import DropDownPicker from 'react-native-dropdown-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchExchangeRates } from '../../api/exchangeRateApi';
 
 const Calculator = () => {
-  const { exchangeRates, loading, error } = useExchangeRates();
-  const [open, setOpen] = useState(false); // 드롭다운 열기/닫기 상태
-  const [selectedRate, setSelectedRate] = useState(null); // 선택한 환율
-  const [amount, setAmount] = useState(''); // 입력 금액
-  const [convertedAmount, setConvertedAmount] = useState(null); // 변환 결과
+  const [rates, setRates] = useState([]);
+  const [baseCurrency, setBaseCurrency] = useState(null);
+  const [targetCurrency, setTargetCurrency] = useState(null);
+  const [amount, setAmount] = useState('');
+  const [convertedAmount, setConvertedAmount] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [openBase, setOpenBase] = useState(false);
+  const [openTarget, setOpenTarget] = useState(false);
+
+  const loadExchangeRates = async () => {
+    try {
+      const cached = await AsyncStorage.getItem('exchangeRates');
+      const today = new Date().toISOString().slice(0, 10);
+
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.date === today) {
+          setRates(parsed.data);
+          setLoading(false);
+          return;
+        }
+      }
+
+      const response = await fetchExchangeRates();
+
+      setRates(response);
+      await AsyncStorage.setItem(
+        'exchangeRates',
+        JSON.stringify({ date: today, data })
+      );
+    } catch (err) {
+      Alert.alert('오류 발생', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadExchangeRates();
+  }, []);
+
+  // 금액, 기준 통화, 타겟 통화가 변경되면 자동 계산
+  useEffect(() => {
+    if (!amount || !baseCurrency || !targetCurrency) {
+      setConvertedAmount(null);
+      return;
+    }
+
+    const baseRate = rates.find(
+      (r) => r.targetCurrency === baseCurrency
+    )?.exchangeRate;
+    const targetRate = rates.find(
+      (r) => r.targetCurrency === targetCurrency
+    )?.exchangeRate;
+
+    if (baseRate && targetRate) {
+      const usdAmount = parseFloat(amount) / baseRate;
+      const result = usdAmount * targetRate;
+      setConvertedAmount(result.toFixed(2));
+    }
+  }, [amount, baseCurrency, targetCurrency]);
 
   if (loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size='large' color='#007BFF' />
-        <Text>데이터를 로드 중입니다...</Text>
+        <Text>환율 정보를 불러오는 중...</Text>
       </View>
     );
   }
 
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>오류가 발생했습니다: {error}</Text>
-      </View>
-    );
-  }
-
-  // 환율 변환
-  const handleConvert = () => {
-    if (!selectedRate || !amount) {
-      alert('환율을 선택하고 금액을 입력하세요!');
-      return;
-    }
-
-    const result = parseFloat(amount) * selectedRate;
-    setConvertedAmount(result.toFixed(2)); // 소수점 2자리로 표시
-  };
+  const currencyItems = rates.map((rate) => ({
+    label: rate.targetCurrency,
+    value: rate.targetCurrency,
+  }));
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>환율 계산기</Text>
 
+      {/* 기준 통화 선택 */}
       <DropDownPicker
-        open={open}
-        value={selectedRate}
-        items={exchangeRates.map((item) => ({
-          label: `${item.targetCurrency} (${item.exchangeRate.toFixed(2)})`,
-          value: item.exchangeRate,
-        }))}
-        setOpen={setOpen}
-        setValue={setSelectedRate}
-        placeholder='환율 선택'
-        dropDownContainerStyle={styles.dropdownContainer}
+        open={openBase}
+        value={baseCurrency}
+        items={currencyItems}
+        setOpen={setOpenBase}
+        setValue={setBaseCurrency}
+        placeholder='기준 통화 선택'
         style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownContainer}
+        zIndex={3000}
+        zIndexInverse={1000}
+      />
+
+      {/* 타겟 통화 선택 */}
+      <DropDownPicker
+        open={openTarget}
+        value={targetCurrency}
+        items={currencyItems}
+        setOpen={setOpenTarget}
+        setValue={setTargetCurrency}
+        placeholder='변환 통화 선택'
+        style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownContainer}
+        zIndex={2000}
+        zIndexInverse={2000}
       />
 
       <TextInput
         style={styles.input}
-        placeholder='금액 입력 (USD)'
+        placeholder='금액 입력'
         keyboardType='numeric'
         value={amount}
         onChangeText={setAmount}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleConvert}>
-        <Text style={styles.buttonText}>변환하기</Text>
-      </TouchableOpacity>
-
       {convertedAmount && (
         <View style={styles.resultContainer}>
-          <Text style={styles.resultTitle}>변환 결과</Text>
+          <Text style={styles.resultTitle}>환율 변환 결과</Text>
           <Text style={styles.result}>
-            {amount} USD → {convertedAmount}{' '}
-            {
-              exchangeRates.find((rate) => rate.exchangeRate === selectedRate)
-                ?.targetCurrency
-            }
+            {amount} {baseCurrency} → {convertedAmount} {targetCurrency}
           </Text>
         </View>
       )}
@@ -100,16 +149,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'left',
     marginBottom: 20,
   },
   dropdown: {
     backgroundColor: '#fff',
     borderColor: '#ccc',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   dropdownContainer: {
     borderColor: '#ccc',
@@ -124,18 +171,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
   },
-  button: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
   resultContainer: {
     marginTop: 20,
     backgroundColor: '#E8F0FE',
@@ -144,20 +179,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resultTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   result: {
     fontSize: 18,
     color: '#007BFF',
     fontWeight: 'bold',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
   },
   center: {
     flex: 1,
