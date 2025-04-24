@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  Animated,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useRouter } from 'expo-router';
@@ -24,6 +25,7 @@ const periods = [
   { label: '월간', value: 'monthly' },
   { label: '연간', value: 'yearly' },
 ];
+const HEADER_HEIGHT = 130;
 
 export default function PostsScreen() {
   const [posts, setPosts] = useState([]);
@@ -41,6 +43,7 @@ export default function PostsScreen() {
   const { authState } = useAuth();
   const { countries } = useContext(DataContext); // 국가 리스트 가져오기
   const router = useRouter();
+  // const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     initPosts();
@@ -134,6 +137,127 @@ export default function PostsScreen() {
     router.push('/posts/addPost');
   };
 
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const currentOffset = useRef(0);
+  const scrollDirection = useRef('up'); // 'up' or 'down'
+
+  const headerAnim = useRef(new Animated.Value(0)).current; // 0: 보임, -1: 숨김
+
+  const onScroll = ({ nativeEvent }) => {
+    const offsetY = nativeEvent.contentOffset.y;
+
+    if (offsetY > currentOffset.current && offsetY > 50) {
+      // 아래로 스크롤 중 (숨김)
+      if (scrollDirection.current !== 'down') {
+        scrollDirection.current = 'down';
+        Animated.timing(headerAnim, {
+          toValue: -1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    } else if (offsetY < currentOffset.current - 10) {
+      // 위로 스크롤 중 (보임)
+      if (scrollDirection.current !== 'up') {
+        scrollDirection.current = 'up';
+        Animated.timing(headerAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    }
+
+    currentOffset.current = offsetY;
+  };
+
+  const Header = () => {
+    const translateY = headerAnim.interpolate({
+      inputRange: [-1, 0],
+      outputRange: [-HEADER_HEIGHT, 0],
+    });
+
+    return (
+      <Animated.View
+        style={[styles.headerContainer, { transform: [{ translateY }] }]}
+      >
+        {/* 헤더 */}
+        <View style={styles.header}>
+          <Text style={styles.title}>게시판</Text>
+          <TouchableOpacity style={styles.addButton} onPress={clickToAddPost}>
+            <Text style={styles.addButtonText}>+ 작성</Text>
+          </TouchableOpacity>
+        </View>
+        {/* 필터 컨테이너 (탭 + 드롭다운) */}
+        <View style={styles.filterContainer}>
+          {/* 탭 필터 */}
+          <View style={styles.tabContainer}>
+            {tabs.map((tab) => (
+              <TouchableOpacity
+                key={tab}
+                style={[styles.tab, activeTab === tab && styles.activeTab]}
+                onPress={() => setActiveTab(tab)}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === tab && styles.activeTabText,
+                  ]}
+                >
+                  {tab === 'latest'
+                    ? '최신'
+                    : tab === 'likes'
+                    ? '좋아요 수'
+                    : tab === 'views'
+                    ? '조회 수'
+                    : '댓글 수'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.dropdownContainer}>
+            <View style={styles.dropdownWrapper}>
+              {/* 국가 필터 드롭다운 */}
+              <DropDownPicker
+                open={openCountry}
+                value={selectedCountry}
+                items={[
+                  { label: '전체 국가', value: null },
+                  { label: '자유 게시판', value: 'free' },
+                  ...countries.map((c) => ({
+                    label: c.koreanName,
+                    value: c.iso2Code,
+                  })),
+                ]}
+                setOpen={setOpenCountry}
+                setValue={setSelectedCountry}
+                placeholder='전체 국가'
+                style={styles.dropdown}
+                dropDownContainerStyle={{ borderColor: '#aaa' }}
+                textStyle={{ color: '#333' }}
+              />
+            </View>
+
+            <View style={styles.dropdownWrapper}>
+              {/* 기간 필터 */}
+              <DropDownPicker
+                open={openPeriod}
+                value={selectedPeriod}
+                items={periods}
+                setOpen={setOpenPeriod}
+                setValue={setSelectedPeriod}
+                style={styles.dropdown}
+                dropDownContainerStyle={{ borderColor: '#aaa' }}
+                textStyle={{ color: '#333' }}
+              />
+            </View>
+          </View>
+        </View>
+      </Animated.View>
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -156,83 +280,10 @@ export default function PostsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <Text style={styles.title}>게시판</Text>
-        <TouchableOpacity style={styles.addButton} onPress={clickToAddPost}>
-          <Text style={styles.addButtonText}>+ 작성</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 필터 컨테이너 (탭 + 드롭다운) */}
-      <View style={styles.filterContainer}>
-        {/* 탭 필터 */}
-        <View style={styles.tabContainer}>
-          {tabs.map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={[styles.tab, activeTab === tab && styles.activeTab]}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
-              >
-                {tab === 'latest'
-                  ? '최신'
-                  : tab === 'likes'
-                  ? '좋아요 수'
-                  : tab === 'views'
-                  ? '조회 수'
-                  : '댓글 수'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={styles.dropdownContainer}>
-          <View style={styles.dropdownWrapper}>
-            {/* 국가 필터 드롭다운 */}
-            <DropDownPicker
-              open={openCountry}
-              value={selectedCountry}
-              items={[
-                { label: '전체 국가', value: null },
-                { label: '자유 게시판', value: 'free' },
-                ...countries.map((c) => ({
-                  label: c.koreanName,
-                  value: c.iso2Code,
-                })),
-              ]}
-              setOpen={setOpenCountry}
-              setValue={setSelectedCountry}
-              placeholder='전체 국가'
-              style={styles.dropdown}
-              dropDownContainerStyle={{ borderColor: '#aaa' }}
-              textStyle={{ color: '#333' }}
-            />
-          </View>
-
-          <View style={styles.dropdownWrapper}>
-            {/* 기간 필터 */}
-            <DropDownPicker
-              open={openPeriod}
-              value={selectedPeriod}
-              items={periods}
-              setOpen={setOpenPeriod}
-              setValue={setSelectedPeriod}
-              style={styles.dropdown}
-              dropDownContainerStyle={{ borderColor: '#aaa' }}
-              textStyle={{ color: '#333' }}
-            />
-          </View>
-        </View>
-      </View>
+      <Header />
 
       {/* 게시글 목록 */}
-      <FlatList
+      <Animated.FlatList
         ref={flatListRef}
         data={posts}
         keyExtractor={(item) => item.id.toString()}
@@ -248,6 +299,8 @@ export default function PostsScreen() {
             handleLoadMore();
           }
         }}
+        onScroll={onScroll}
+        ListHeaderComponent={<View style={{ height: HEADER_HEIGHT }} />}
         ListEmptyComponent={
           <Text style={styles.listFootText}>게시글이 없습니다.</Text>
         }
@@ -263,6 +316,15 @@ export default function PostsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
+  headerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    backgroundColor: '#fff',
+    elevation: 4,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
