@@ -4,19 +4,36 @@ import { loginRequest, logoutRequest } from '../api/authApi';
 import { Alert } from 'react-native';
 import { publicAxios } from '../api/axiosInstance';
 
-const AuthContext = createContext();
+interface AuthState {
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+}
+
+interface AuthContextValue {
+  authState: AuthState;
+  login: (userData: { email: string; password: string }) => Promise<void>;
+  logout: () => Promise<void>;
+  setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
+  refreshAccessToken: () => Promise<string | undefined>;
+  updateAuthState: (newState: AuthState) => void;
+  deleteTokens: () => Promise<void>;
+  setToken: (key: string, value: string) => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
 
 const ACCESS = 'accessToken';
 const REFRESH = 'refreshToken';
 
-export const AuthProvider = ({ children }) => {
-  const [authState, setAuthState] = useState({
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [authState, setAuthState] = useState<AuthState>({
     accessToken: null,
     refreshToken: null,
     isAuthenticated: false,
   });
 
-  const login = async (userData) => {
+  const login = async (userData: { email: string; password: string }) => {
     try {
       const response = await loginRequest(userData);
       const { accessToken, refreshToken } = response;
@@ -29,7 +46,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
       const response = logoutRequest();
       await deleteTokens();
@@ -40,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const setToken = async (key, value) => {
+  const setToken = async (key: string, value: string): Promise<void> => {
     await saveToken(key, value);
     setAuthState((prevState) => ({
       ...prevState,
@@ -49,7 +66,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 토큰들 SecureStore에 저장
-  const setTokens = async (accessToken, refreshToken) => {
+  const setTokens = async (
+    accessToken: string,
+    refreshToken: string
+  ): Promise<void> => {
     await saveToken(ACCESS, accessToken);
     await saveToken(REFRESH, refreshToken);
     setAuthState({
@@ -60,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 토큰들 삭제
-  const deleteTokens = async () => {
+  const deleteTokens = async (): Promise<void> => {
     await deleteToken(ACCESS);
     await deleteToken(REFRESH);
     setAuthState({
@@ -71,11 +91,11 @@ export const AuthProvider = ({ children }) => {
     console.log('토큰 삭제');
   };
 
-  const updateAuthState = (newState) => {
+  const updateAuthState = (newState: AuthState): void => {
     setAuthState(newState);
   };
 
-  const loadTokens = async () => {
+  const loadTokens = async (): Promise<void> => {
     const accessToken = await getToken(ACCESS);
     const refreshToken = await getToken(REFRESH);
 
@@ -100,7 +120,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 리프레시 토큰으로 엑세스 토큰 갱신
-  const refreshAccessToken = async () => {
+  const refreshAccessToken = async (): Promise<string | undefined> => {
     try {
       const refreshToken = await getToken(REFRESH);
       if (!refreshToken) throw new Error('리프레시 토큰이 없습니다.');
@@ -159,4 +179,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext)!;

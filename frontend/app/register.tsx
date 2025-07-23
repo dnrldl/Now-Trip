@@ -11,13 +11,13 @@ import { useRouter } from 'expo-router';
 import { register } from '../api/authApi';
 
 export default function RegisterScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [errors, setErrors] = useState({});
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [nickname, setNickname] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
   const handleRegister = async () => {
@@ -38,7 +38,7 @@ export default function RegisterScreen() {
       await register({ email, password, name, nickname, phoneNumber });
       alert('회원가입이 완료되었습니다.');
       router.push('/login');
-    } catch (error) {
+    } catch (error: any) {
       console.log('회원가입 오류: ', error);
       setErrors(error.details);
     }
