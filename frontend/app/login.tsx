@@ -19,9 +19,9 @@ import SocialLoginButton from '../components/SocialLoginButton';
 const BACKEND_OAUTH_URL = 'http://localhost:8080/oauth2/authorization/';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const { login, setTokens } = useAuth();
   const router = useRouter();
 
@@ -37,13 +37,13 @@ export default function LoginScreen() {
       await login({ email, password });
       Alert.alert('로그인 성공', '환영합니다!');
       router.replace('/');
-    } catch (error) {
+    } catch (error: any) {
       console.log('로그인 실패: ', error.message);
       setError(error.message);
     }
   };
 
-  const handleSocialLogin = async (platform) => {
+  const handleSocialLogin = async (platform: 'google' | 'naver') => {
     console.log(platform + ' 로그인 실행');
     const authUrl = `${
       BACKEND_OAUTH_URL + platform
@@ -66,7 +66,7 @@ export default function LoginScreen() {
         router.push('/');
       }
     } catch (error) {
-      console.error(err);
+      console.error(error);
     }
   };
 

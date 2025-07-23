@@ -1,7 +1,15 @@
 import { privateAxios, publicAxios } from './axiosInstance';
 import handleError from './handleApiError';
 
-export const register = async (userData) => {
+interface RegisterData {
+  email: string;
+  password: string;
+  name: string;
+  nickname: string;
+  phoneNumber: string;
+}
+
+export const register = async (userData: RegisterData): Promise<any> => {
   try {
     const response = await publicAxios.post('/users/register', userData);
     return response.data;
@@ -10,7 +18,10 @@ export const register = async (userData) => {
   }
 };
 
-export const loginRequest = async (userData) => {
+export const loginRequest = async (userData: {
+  email: string;
+  password: string;
+}): Promise<any> => {
   try {
     const response = await publicAxios.post('/auth/login', userData);
     return response.data;
@@ -19,7 +30,7 @@ export const loginRequest = async (userData) => {
   }
 };
 
-export const logoutRequest = async () => {
+export const logoutRequest = async (): Promise<any> => {
   try {
     const response = await privateAxios.post('/auth/logout');
     return response.data;
